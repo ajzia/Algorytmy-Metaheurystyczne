@@ -68,12 +68,12 @@ end
     nearest_neighbour(node, dimension, weights) -> (Array{Float64}, Float64)
   Calculates the best path using nearest neighbour algorithm with a given starting node.
 
-### Parameters:
+## Parameters:
 - `node::Int`: starting node.
 - `dimension::Int`: number of nodes in a path.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
 
-### Returns:
+## Returns:
 - `Array{Int64}`: the best path found.
 - `Float64`: path's weight.
 
@@ -134,7 +134,7 @@ end
   Runs test for a given algorithm with `tsp_dict`.
   Requires function `func` to determine the best path for the algorithm.
 
-## Params:
+## Parameters:
 - `name::{String}`: name of the algorithm.
 - `func::{Function}`: function used to calculate a path.
 - `tsp_dict::Dict`: `TSP` dataset.
