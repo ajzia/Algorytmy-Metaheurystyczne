@@ -190,7 +190,7 @@ function two_opt(tsp_dict::Dict, path::Vector{T}) where T<:Integer
 
     while better
         better = false
-        for i in 2:length(path) - 2, j in i+2:length(path)-1
+        for i in 2:length(path), j in i+2:length(path)
             new_path = swap(copy(path), i, j)
             if calculate_path(new_path, tsp_dict[:weights]) < min_length
                 best_path = new_path
