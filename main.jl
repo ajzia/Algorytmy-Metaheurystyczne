@@ -130,6 +130,60 @@ function repetitive_nearest_neighbour(tsp_dict::Dict)
 end
 
 """
+    swap(path, i, j) -> (Vector{T}) where T<:Integer
+  Reverses the nodes between `i` and `j` on a given path.
+
+## Parameters:
+- `path::Vector{T}`: the path to invert.
+- `i::Int`: starting index.
+- `j::Int`: ending index.
+  
+## Returns:
+- `Vector{T}`: the inverted path.
+
+"""
+function swap(path::Vector{T}, i::Int, j::Int) where T<:Integer
+  while i < j
+    path[i], path[j] = path[j], path[i]
+    i += 1; j -= 1
+  end
+  return path
+end
+  
+"""
+    two_opt(tsp_dict, path) -> (Array{Float64}, Float64)
+  Returns an improved path.
+
+## Parameters:
+- `tsp_dict::Dict`: `TSP` dataset.
+- `path::Vector{T}`: the path to improve.
+  
+## Returns:
+- `Array{Int64}`: the best path found.
+- `Float64`: path's weight.
+
+"""
+function two_opt(tsp_dict::Dict, path::Vector{T}) where T<:Integer
+  best_path = copy(path)
+  min_length = calculate_path(path, tsp_dict[:weights])
+  better = true
+  
+  while better
+    better = false
+    for i in 1:length(path), j in i+1:length(path)
+      new_path = swap(copy(path), i, j)
+      if calculate_path(new_path, tsp_dict[:weights]) < min_length
+        best_path = new_path
+        min_length = calculate_path(new_path, tsp_dict[:weights])
+        better = true
+      end
+    end
+    path = best_path
+  end
+  return(best_path, min_length)
+end
+
+"""
     tsp_test(name, f, tsp_dict)
   Runs test for a given algorithm with `tsp_dict`.
   Requires function `func` to determine the best path for the algorithm.
@@ -143,66 +197,9 @@ end
 function tsp_test(name::String, func::Function, tsp_dict::Dict, args...)
   (path, weight) = func(tsp_dict, args...)
   println("Algorithm: $name")
-  println("Path: $path \nDistance: $weight\n")
+  if tsp_dict[:dimension] <= 51 println("Path: $path \nDistance: $weight\n")
+  else println("Distance: $weight\n") end
 end
-
-"""
-    swap(path, i, j) -> (Vector{T}) where T<:Integer
-  Reverses the nodes between i and j on given path.
-
-## Parameters:
-  - `path::Vector{T}`: the path to be inverted
-  - `i::Int`: starting index
-  - `j::Int`: ending index
-  
-## Returns:
-- `Vector{T}`: the inverted path.
-
-"""
-
-function swap(array::Vector{T}, i::Int, j::Int) where T<:Integer
-    while i < j
-        array[i], array[j] = array[j], array[i]
-        i+=1
-        j-=1
-    end
-    return array
-end
-
-"""
-    two-opt(tsp_dict, path) -> (Array{Float64}, Float64)
-  Returns the best path after trying to improve the given path
-
-## Parameters:
-  - `tsp_dict::Dict`: `TSP` dataset.
-  - `path::Vector{T}`: the starting path which we want to improve.
-  
-## Returns:
-- `Array{Int64}`: the best path found.
-- `Float64`: path's weight.
-
-"""
-function two_opt(tsp_dict::Dict, path::Vector{T}) where T<:Integer
-    best_path = copy(path)
-    start_path = path
-    min_length = calculate_path(path, tsp_dict[:weights])
-    better = true
-
-    while better
-        better = false
-        for i in 2:length(path), j in i+2:length(path)
-            new_path = swap(copy(path), i, j)
-            if calculate_path(new_path, tsp_dict[:weights]) < min_length
-                best_path = new_path
-                min_length = calculate_path(new_path, tsp_dict[:weights])
-                better = true
-            end
-        end
-        path = best_path
-    end
-    return(best_path, min_length)
-end
-
 
 """
   Main program function.
@@ -220,7 +217,8 @@ function main()
 
   # 2-OPT test
   tsp_test("two-opt", two_opt, tsp_dict, repetitive_nearest_neighbour(tsp_dict)[1])
-
 end
 
-main()
+if abspath(PROGRAM_FILE) == @__FILE__
+  main()
+end
