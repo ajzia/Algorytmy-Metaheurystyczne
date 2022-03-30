@@ -8,11 +8,11 @@ using Statistics
 
 """
     save_data()
-  Saves data from algorithms for given files in a .json file.
+  Saves data from algorithms for the given files to a .json file.
 
 """
 function save_data()
-  prd = Dict()
+  prd = Dict(); krand = Dict()
 
   tsp_files = [
   "burma14", "gr17", "ulysses22", "fri26", "bays29", 
@@ -21,38 +21,53 @@ function save_data()
   "pr144", "kroA150", "u159", "si175", "kroB200",
   ]
 
-  temp1 = []; i = 1
+  temp1 = []
   for x in tsp_files
     tsp = readTSP("./all/" * x * ".tsp")
     tsp_dict = struct_to_dict(tsp)
 
-    n = tsp_dict[:dimension]
-    opt = tsp_dict[:optimal]
-
-    prd[n] = []
+    n, opt = (tsp_dict[:dimension], tsp_dict[:optimal])
+    prd[n], krand[n] = ([], [])
+    prd["name"] = "prd"; krand["name"] = "k-random"
+    krand["k"] = [1000, 10000, 1000000, 1000000]
 
     for i in 1:100
       push!(temp1, k_random(tsp_dict, 100)[2])
     end
 
-    x = mean(temp1)
+    for i in (1000, 10000, 100000, 1000000)
+      push!(krand[n], k_random(tsp_dict, i)[2])
+    end
+
     path, y = (repetitive_nearest_neighbour(tsp_dict))
     z = two_opt(tsp_dict, path)[2]
 
-    push!(prd[n], x); push!(prd[n], y); push!(prd[n], z); push!(prd[n], opt);
-
-    println(i)
-    i += 1
+    push!(prd[n], mean(temp1)); push!(prd[n], y); push!(prd[n], z); push!(prd[n], opt);
   end
 
   isdir("./data") || mkdir("./data")
   isfile("./data/prd.json") 
-  open("./data/prd.json", "w") do io
+  open("./data/prdcopy.json", "w") do io
     JSON.print(io, prd)
+  end
+
+  isfile("./data/krand.json") 
+  open("./data/krand.json", "w") do io
+    JSON.print(io, krand)
   end
 end
 
-# draw path for a specific problem for a specific algorithm
+
+"""
+    draw_path(name, nodes, path)
+  Draws the given path on a plot.
+  
+# Parameters:
+- `name::String`: name of the .tsp file.
+- `nodes::AbstractMatrix{Float64}`: coordinates of nodes.
+- `path::Vector{T<:Integer}`: computed path.
+ 
+"""
 function draw_path(name::String, nodes::AbstractMatrix{Float64}, path::Vector{T}) where T <: Integer 
   x = []; y = [] 
   n = length(path)
@@ -85,36 +100,61 @@ function prd(data::Float64, optimal::Int64)
 end
 
 """
-    draw_plot(data_dict)
+    draw_plot(name, data_dict)
   Draws plots showing prd for specific algorithms.
 
 # Parameters:
+- `name::String`: name of the statistic.
 - `data_dict::Dict`: dictionary with data from algorithms for several .tsp files.
 
 """
-function draw_plot(data_dict::Dict)
-  x = []; y1 = []; y2 = []; y3 = []
+function draw_plot(name::String, data_dict::Dict)
+  x, y1, y2, y3, y4 = ([], [], [], [], [])
 
   for i in ("14", "17", "22", "26", "29", "42", "51", "70", "76", "96", "100", "107", "127", "130", "137", "144", "150", "159", "175", "200")
     opt::Int64 = floor(data_dict[i][4])
-    a = prd(data_dict[i][1], opt)
-    b = prd(data_dict[i][2], opt)
-    c = prd(data_dict[i][3], opt)
+    if name == "prd"
+      a = prd(data_dict[i][1], opt)
+      b = prd(data_dict[i][2], opt)
+      c = prd(data_dict[i][3], opt)
 
+    elseif name == "k-random"
+      a = data_dict[i][1]
+      b = data_dict[i][2]
+      c = data_dict[i][3]
+      d = data_dict[i][4]
+
+      push!(y4, d)
+    end
     push!(x, i); push!(y1, a); push!(y2, b); push!(y3, c); 
   end
 
   plotlyjs()
   isdir("./plots") || mkdir("./plots")
   
-  plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title="prd for k_random algorithm", label = "k_random", legend=:outertopright)
-  Plots.savefig(plt, "./plots/prd.png")
+  if name == "prd"
+    plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title="$name for k_random algorithm", label = "k_random", legend=:outertopright)
+    Plots.savefig(plt, "./plots/$name-krand.png")
+    Plots.plot()
+    l2, l3 = "rnn", "2opt"
+  elseif name == "k-random"
+    plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "1000", legend=:outertopright)
+    l2, l3 = "10000", "100000"
+  end 
 
-  plt = Plots.plot(x, y2, xticks=:all, marker=(:circle,5), yformatter = :plain, title="prd", label = "rnn", legend=:outertopright)
-  plt = Plots.plot!(x, y3, xticks=:all, marker=(:circle,5), yformatter = :plain, title="prd", label = "2opt", legend=:outertopright)
-  Plots.savefig(plt, "./plots/prd-rnn-2opt.png")
+  plt = Plots.plot!(x, y2, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = l2, legend=:outertopright)
+  plt = Plots.plot!(x, y3, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = l3, legend=:outertopright)
+  
+  if name == "k-random" 
+    plt = Plots.plot!(x, y4, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "1000000", legend=:outertopright) 
+  end
+
+  Plots.savefig(plt, "./plots/$name.png")
 end
 
+"""
+  Main program function.
+"""
 function main()
   # saving data - muted, so it;s not going every time
   # save_data()
@@ -122,7 +162,7 @@ function main()
   for (root, dirs, files) in walkdir("./data")
     for file in files
       data_dict = JSON.parsefile(joinpath(root, file))
-      draw_plot(data_dict)
+      # draw_plot(data_dict["name"], data_dict)
     end
   end
 
