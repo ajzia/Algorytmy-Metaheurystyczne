@@ -133,20 +133,24 @@ function draw_plot(name::String, data_dict::Dict)
   isdir("./plots") || mkdir("./plots")
   
   if name == "prd"
-    plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title="$name for k_random algorithm", label = "k_random", legend=:outertopright)
+    plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title="$name for k_random algorithm", label = "k_random", legend=:outertopright,
+      margin=5Plots.mm, xlabel = "number of nodes", ylabel = "prd in %")
     Plots.savefig(plt, "./plots/$name-krand.png")
     Plots.plot()
     l2, l3 = "rnn", "2opt"
   elseif name == "k-random"
-    plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "1000", legend=:outertopright)
-    l2, l3 = "10000", "100000"
+    plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "k = 1000", legend=:outertopright)
+    l2, l3 = "k = 10000", "k = 100000"
   end 
 
-  plt = Plots.plot!(x, y2, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = l2, legend=:outertopright)
-  plt = Plots.plot!(x, y3, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = l3, legend=:outertopright)
+  plt = Plots.plot!(x, y2, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = l2, legend=:outertopright,
+    margin=5Plots.mm, xlabel = "number of nodes", ylabel = "prd in %")
+  plt = Plots.plot!(x, y3, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = l3, legend=:outertopright,
+    margin=5Plots.mm, xlabel = "number of nodes", ylabel = "prd in %")
   
   if name == "k-random" 
-    plt = Plots.plot!(x, y4, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "1000000", legend=:outertopright) 
+    plt = Plots.plot!(x, y4, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "k = 1000000", legend=:outertopright, 
+    margin=5Plots.mm, xlabel = "number of nodes", ylabel = "path's weight for the best path found for specific k")
   end
 
   Plots.savefig(plt, "./plots/$name.png")
@@ -162,7 +166,7 @@ function main()
   for (root, dirs, files) in walkdir("./data")
     for file in files
       data_dict = JSON.parsefile(joinpath(root, file))
-      # draw_plot(data_dict["name"], data_dict)
+      draw_plot(data_dict["name"], data_dict)
     end
   end
 
