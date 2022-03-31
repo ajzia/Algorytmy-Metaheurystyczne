@@ -1,6 +1,8 @@
 using TSPLIB
 using Random
 
+counter = 0
+
 """
     struct_to_dict(s) -> Dict
   Converts struct to dict.
@@ -57,8 +59,8 @@ function k_random(tsp_dict::Dict, k::Int)
 
   for i in 1:k
     path = shuffle(collect(1:tsp_dict[:dimension]))
-    length = calculate_path(path, tsp_dict[:weights])
-    
+    length = calculate_path(path, tsp_dict[:weights])    
+    global counter += tsp_dict[:dimension] - 1
     best_path, min_length = (i == 1 || min_length > length) ? (path, length) : (best_path, min_length)
   end
   return (best_path, min_length)
@@ -85,6 +87,7 @@ function nearest_neighbour(node::Int, dimension::Int, weights::AbstractMatrix{Fl
   deleteat!(non_visited, node)
   
   path = [node]
+  path_length = 0
   
   for i in 1:dimension-1
     min_length = maximum!(float([1]), weights[path[end], :])[1] + 1
@@ -92,15 +95,17 @@ function nearest_neighbour(node::Int, dimension::Int, weights::AbstractMatrix{Fl
 
     for i in 1:size(non_visited, 1)
       len = weights[path[end], non_visited[i]]
-    
+      global counter += 1
       (nearest_node, min_length) = min_length > len ? (non_visited[i], len) : (nearest_node, min_length)
     end
     
     push!(path, nearest_node)
+    path_length += min_length
     deleteat!(non_visited, findall(x -> x == nearest_node, non_visited))
   end
 
-  return (path, calculate_path(path, weights))
+  path_length += weights[path[end], node]
+  return (path, path_length)
 end
 
 """
@@ -122,33 +127,11 @@ function repetitive_nearest_neighbour(tsp_dict::Dict)
 
   for i in 1:tsp_dict[:dimension]
     path, length = nearest_neighbour(i, tsp_dict[:dimension], tsp_dict[:weights])
-
     best_path, min_length = (i == 1 || min_length > length) ? (path, length) : (best_path, min_length)
   end
-
   return (best_path, min_length)
 end
 
-"""
-    swap(path, i, j) -> (Vector{T}) where T<:Integer
-  Reverses the nodes between `i` and `j` on a given path.
-
-## Parameters:
-- `path::Vector{T}`: the path to invert.
-- `i::Int`: starting index.
-- `j::Int`: ending index.
-  
-## Returns:
-- `Vector{T}`: the inverted path.
-
-"""
-function swap(path::Vector{T}, i::Int, j::Int) where T<:Integer
-  while i < j
-    path[i], path[j] = path[j], path[i]
-    i += 1; j -= 1
-  end
-  return path
-end
   
 """
     two_opt(tsp_dict, path) -> (Array{Float64}, Float64)
@@ -156,7 +139,7 @@ end
 
 ## Parameters:
 - `tsp_dict::Dict`: `TSP` dataset.
-- `path::Vector{T}`: the path to improve.
+- `path::Vector{T<:Integer}`: the path to improve.
   
 ## Returns:
 - `Array{Int64}`: the best path found.
@@ -171,10 +154,12 @@ function two_opt(tsp_dict::Dict, path::Vector{T}) where T<:Integer
   while better
     better = false
     for i in 1:length(path), j in i+1:length(path)
-      new_path = swap(copy(path), i, j)
-      if calculate_path(new_path, tsp_dict[:weights]) < min_length
+      global counter+= 1
+      new_path = reverse(path, i, j)
+      new_length = calculate_path(new_path, tsp_dict[:weights])
+      if new_length < min_length
         best_path = new_path
-        min_length = calculate_path(new_path, tsp_dict[:weights])
+        min_length = new_length
         better = true
       end
     end
@@ -217,8 +202,15 @@ function main()
 
   # 2-OPT test
   tsp_test("two-opt", two_opt, tsp_dict, repetitive_nearest_neighbour(tsp_dict)[1])
+  
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__
   main()
+end
+
+function counting_test(func::Function, tsp_dict::Dict, args...)
+  global counter = 0
+  func(tsp_dict, args...)
+  return counter
 end

@@ -1,5 +1,4 @@
 include("./main.jl")
-include("./generator.jl")
 
 using TSPLIB
 using JSON
