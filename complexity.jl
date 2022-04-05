@@ -56,15 +56,15 @@ function testing()
     append!(const_dict[:twoopt], twoopt_c/(n*n*n))
   end
 
-  isdir("./json_data/counting") || mkdir("./json_data/counting")
-  isfile("./json_data/counting/counting-test.json") || 
-  open("./json_data/counting/counting-test.json", "w") do io
+  isdir("./data") || mkdir("./data")
+  isfile("./data/counting-test.json") || 
+  open("./data/counting-test.json", "w") do io
     JSON.print(io, count_dict)
   end
 
-  isdir("./json_data/counting") || mkdir("./json_data/counting")
-  isfile("./json_data/counting/counting-constants.json") || 
-  open("./json_data/counting/counting-constants.json", "w") do io
+  isdir("./data") || mkdir("./data")
+  isfile("./data/counting-constants.json") || 
+  open("./data/counting-constants.json", "w") do io
     JSON.print(io, const_dict)
   end
   
@@ -101,8 +101,8 @@ end
 function main()
   
   testing()
-  dataC_dict = JSON.parsefile("./json_data/counting/counting-test.json")
-  dataT_dict = JSON.parsefile("./json_data/counting/counting-constants.json")
+  dataC_dict = JSON.parsefile("./data/counting-test.json")
+  dataT_dict = JSON.parsefile("./data/counting-constants.json")
   draw_plot(dataC_dict, dataT_dict)
 
 end
