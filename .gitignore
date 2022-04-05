@@ -27,8 +27,4 @@ Manifest.toml
 
 /json_data
 
-/plots
-
-/data
-
 dump.jl

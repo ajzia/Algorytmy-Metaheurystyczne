@@ -1,4 +1,5 @@
 include("./main.jl")
+include("./wilcoxon.jl")
 
 using TSPLIB
 using JSON
@@ -18,7 +19,7 @@ function save_data()
   "burma14", "gr17", "ulysses22", "fri26", "bays29", 
   "swiss42", "eil51", "st70", "eil76", "gr96", 
   "kroA100", "pr107", "bier127", "ch130", "gr137",
-  "pr144", "kroA150", "u159", "si175", "kroB200",
+  "pr144", "kroA150", "u159", "si175", "kroB200"
   ]
 
   temp1 = []
@@ -47,7 +48,7 @@ function save_data()
 
   isdir("./data") || mkdir("./data")
   isfile("./data/prd.json") 
-  open("./data/prdcopy.json", "w") do io
+  open("./data/prd.json", "w") do io
     JSON.print(io, prd)
   end
 
@@ -56,7 +57,6 @@ function save_data()
     JSON.print(io, krand)
   end
 end
-
 
 """
     draw_path(name, nodes, path)
@@ -160,13 +160,17 @@ end
   Main program function.
 """
 function main()
-  # saving data - muted, so it;s not going every time
-  # save_data()
+  save_data()
 
   for (root, dirs, files) in walkdir("./data")
     for file in files
       data_dict = JSON.parsefile(joinpath(root, file))
       draw_plot(data_dict["name"], data_dict)
+
+      if data_dict["name"] == "prd"
+        wilcoxon_test(data_dict)
+      end
+
     end
   end
 
