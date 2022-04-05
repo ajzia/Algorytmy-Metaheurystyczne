@@ -5,6 +5,10 @@ using JSON
 using Plots
 using PlotlyJS
 
+"""
+    testing()
+  Tests different starting paths for 2-OPT and saves data to a .json file.
+"""
 function testing()
   length_dict = Dict(
     :name => "2opt-start",
@@ -55,6 +59,13 @@ function testing()
   
 end
 
+"""
+    draw_plot(data_dict)
+  Draws plot showing differences in path length for different starting paths.
+  
+# Parameters:
+- `data_dict::Dict`: dictionary with data from tests. 
+"""
 function draw_plot(data_dict::Dict)
   x = data_dict["n"]
   y1 = data_dict["one_random"]
@@ -73,6 +84,9 @@ function draw_plot(data_dict::Dict)
   Plots.savefig(plt, "./plots/2opt-starting-path.png")
 end
 
+"""
+  Main program function.
+"""
 function main()
   
   testing()
