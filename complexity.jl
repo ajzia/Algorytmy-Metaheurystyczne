@@ -5,6 +5,10 @@ using JSON
 using Plots
 using PlotlyJS
 
+"""
+    testing()
+  Runs complexity tests and saves complexity data from algorithms for the given files to a .json file.
+"""
 function testing()
   count_dict = Dict(
     :name => "Counting",
@@ -66,6 +70,13 @@ function testing()
   
 end
 
+"""
+    draw_plot(dataC_dict, dataT_dict)
+  Draws plots showing complexity and constants for specific algorithms.
+# Parameters:
+- `data_dictC::Dict`: dictionary with data from algorithms for several .tsp files.
+- `data_dictT::Dict`: dictionary with data from algorithms for several .tsp files.
+"""
 function draw_plot(dataC_dict::Dict, dataT_dict::Dict)
   x = dataC_dict["n"]; y1 = dataC_dict["krandom"]; y2 = dataC_dict["rnn"]; y3 = dataC_dict["twoopt"]
   xx = dataT_dict["n"]; yy1 = dataT_dict["krandom"]; yy2 = dataT_dict["rnn"]; yy3 = dataT_dict["twoopt"]
@@ -84,6 +95,9 @@ function draw_plot(dataC_dict::Dict, dataT_dict::Dict)
   Plots.savefig(plt, "./plots/complexityConstants.png")
 end
 
+"""
+  Main program function.
+"""
 function main()
   
   testing()
