@@ -1,7 +1,7 @@
 using TSPLIB
 using Random
 
-counter = 0
+# counter = 0
 
 """
     struct_to_dict(s) -> Dict
@@ -60,7 +60,7 @@ function k_random(tsp_dict::Dict, k::Int)
   for i in 1:k
     path = shuffle(collect(1:tsp_dict[:dimension]))
     length = calculate_path(path, tsp_dict[:weights])    
-    global counter += tsp_dict[:dimension] - 1
+    # global counter += tsp_dict[:dimension] - 1
     best_path, min_length = (i == 1 || min_length > length) ? (path, length) : (best_path, min_length)
   end
   return (best_path, min_length)
@@ -95,7 +95,7 @@ function nearest_neighbour(node::Int, dimension::Int, weights::AbstractMatrix{Fl
 
     for i in 1:size(non_visited, 1)
       len = weights[path[end], non_visited[i]]
-      global counter += 1
+      # global counter += 1
       (nearest_node, min_length) = min_length > len ? (non_visited[i], len) : (nearest_node, min_length)
     end
     
@@ -132,7 +132,6 @@ function repetitive_nearest_neighbour(tsp_dict::Dict)
   return (best_path, min_length)
 end
 
-  
 """
     two_opt(tsp_dict, path) -> (Array{Float64}, Float64)
   Returns an improved path.
@@ -154,7 +153,7 @@ function two_opt(tsp_dict::Dict, path::Vector{T}) where T<:Integer
   while better
     better = false
     for i in 1:length(path), j in i+1:length(path)
-      global counter+= 1
+      # global counter+= 1
       new_path = reverse(path, i, j)
       new_length = calculate_path(new_path, tsp_dict[:weights])
       if new_length < min_length
@@ -186,13 +185,16 @@ function tsp_test(name::String, func::Function, tsp_dict::Dict, args...)
   else println("Distance: $weight\n") end
 end
 
+function load_tsp(path::String)
+  return struct_to_dict(readTSP(path))
+end
+
 """
   Main program function.
 """
 function main()
   # reading .tsp file and converting it to dictionary
-  tsp = readTSP("./all/eil51.tsp")
-  tsp_dict = struct_to_dict(tsp)
+  tsp_dict = load_tsp("./all/eil51.tsp")
 
   # k_random test
   tsp_test("k-random", k_random, tsp_dict, 100000)
@@ -210,7 +212,7 @@ if abspath(PROGRAM_FILE) == @__FILE__
 end
 
 function counting_test(func::Function, tsp_dict::Dict, args...)
-  global counter = 0
+  # global counter = 0
   func(tsp_dict, args...)
-  return counter
+  # return counter
 end
