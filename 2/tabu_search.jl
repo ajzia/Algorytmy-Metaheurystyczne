@@ -1,93 +1,92 @@
-include("../1/main.jl")
-using DataStructures;
 # dzisiejsza lista tabu: przepraszam, sorry, sory, sorki 
+module TabuSearch
+  using DataStructures 
 
-"""
-    tabu_search(duzo argumentow) -> (costam)
-  Returns the best found path.
+  # exports from ../1/main.jl
+  export load_tsp, struct_to_dict, calculate_path
+  export k_random, nearest_neighbour, repetitive_nearest_neighbour, two_opt
+  # exports from this file
+  export tabu_search
+  # exports from ./stop_move.jl
+  export swap, invert, insert
 
-## Parameters:
-- `tsp_dict::Dict`: `TSP` dataset.
-- `path::Vector{T<:Integer}`: the path to improve.
-  
-## Returns:
-- `Array{Int64}`: the best path found.
-- `Float64`: path's weight.
+  """
+      tabu_search(duzo argumentow) -> (costam)
+    Returns the best found path.
 
-"""
-function tabu_search(tsp_dict::Dict, starting_path::Vector{T}, stop_cond::String, max::Float64, tabu_size::Int, nodes::Int) where T<:Integer
+  ## Parameters:
+  - `path::Vector{T<:Integer}`: the path to improve.
+    
+  ## Returns:
+  - `Array{Int64}`: the best path found.
+  - `Float64`: path's weight.
 
-  print("in tabu")
+  """
+  function tabu_search(starting_path::Vector{T}, move::Function, stop_cond::String, max::Float64, tabu_size::Int, nodes::Int, weights::AbstractMatrix{Float64}) where T<:Integer
+    stops = ["it", "time", "dest", "best"]; @assert stop_cond in stops
+    stats = Dict(); for s in stops stats[s] = 0 end
 
-  starting_length = calculate_path(starting_path, tsp_dict[:weights])
+    starting_length = calculate_path(starting_path, weights)
 
-  # variables
-  global_best_path::Vector{Int} = [];  global_best_length::Float64 = 0
-  local_best_path::Vector{Int} = [];   local_best_length::Float64 = 0
-  current_path::Vector{Int} = [];      current_length::Float64 = 0
-  selected_path::Vector{Int} = [];     selected_length::Float64 = 0
+    # variables
+    global_best_path::Vector{Int} = [];  global_best_length::Float64 = 0
+    local_best_path::Vector{Int} = [];   local_best_length::Float64 = 0
+    current_path::Vector{Int} = [];      current_length::Float64 = 0
+    selected_path::Vector{Int} = [];     selected_length::Float64 = 0
 
+    # init
+    global_best_path = copy(starting_path)
+    local_best_path = copy(starting_path)
+    current_path = copy(starting_path)
+    selected_path = copy(starting_path)
 
-  # init
-  global_best_path = copy(starting_path)
-  local_best_path = copy(starting_path)
-  current_path = copy(starting_path)
-  selected_path = copy(starting_path)
+    global_best_length = local_best_length = current_length = selected_path_length = starting_length
 
-  global_best_length = local_best_length = current_length = selected_path_length = starting_length
+    # tabu list & matrix
+    tabu_list = Queue{Vector{Int}}()
+    for _ in 1:tabu_size enqueue!(tabu_list, [-1, -1]) end
+    tabu_matrix::Vector{BitVector} = [BitVector([0 for _ in 1:nodes]) for _ in 1:nodes]
+    
+    ij = [-1, -1]
 
-  # tabu list & matrix
-  tabu_list = Queue{Vector{Int}}()
-  for _ in 1:tabu_size enqueue!(tabu_list, [-1, -1]) end
-  tabu_matrix::Vector{BitVector} = [BitVector([0 for _ in 1:nodes]) for _ in 1:nodes]
-  
-  ij = [-1, -1]
+    while true
+      stats["it"] += 1
+      if stats[stop_cond] > max return global_best_path, global_best_length end
 
-  it = 0
-  while true
+      for i in 1:nodes-1, j in i+1:nodes
+        if tabu_matrix[i][j] continue end
+        current_path = move(selected_path, i, j)
+        current_length = calculate_path(current_path, weights); stats["dest"] += 1
 
-    for i in 1:nodes-1, j in i+1:nodes
-      if tabu_matrix[i][j] continue end
-      #current_path = move(selected_path, i, j)
-      current_path = reverse(selected_path, i, j) # tylko do testu
-      current_length = calculate_path(current_path, tsp_dict[:weights])
-
-      if current_length < local_best_length
-        local_best_path = copy(current_path)
-        local_best_length = current_length
-        ij = [i, j]
+        if current_length < local_best_length
+          local_best_path = copy(current_path)
+          local_best_length = current_length
+          ij = [i, j]
+        end
       end
-    end
 
-    if local_best_length < global_best_length
-      global_best_path = copy(local_best_path)
-      global_best_length = local_best_length
-    end
+      if local_best_length < global_best_length
+        global_best_path = copy(local_best_path)
+        global_best_length = local_best_length
+        stats["best"] = 0
+      else stats["best"] += 1 end
+        
+      selected_path = local_best_path
+      selected_path_length = local_best_length
 
-    selected_path = local_best_path
-    selected_path_length = local_best_length
+      x = dequeue!(tabu_list); enqueue!(tabu_list, ij) # tabu list
+      tabu_matrix[ij[1]][ij[2]] = tabu_matrix[ij[2]][ij[1]] = true
 
-    x = dequeue!(tabu_list); enqueue!(tabu_list, ij) # tabu list
-    tabu_matrix[ij[1]][ij[2]] = tabu_matrix[ij[2]][ij[1]] = true
+      if x != [-1, -1]
+        tabu_matrix[x[1]][x[2]] = tabu_matrix[x[2]][x[1]] = false
+      end
 
-    if x != [-1, -1]
-      tabu_matrix[x[1]][x[2]] = tabu_matrix[x[2]][x[1]] = false
-    end
+      stats["it"] += 1
+      if stats[stop_cond] > max return global_best_path, global_best_length end
+    end  # while
 
-    it+=1
-    if it == 2000 return (global_best_path, global_best_length) end
-  end  
-end
+  end # tabu search
 
-"""
-  Main program function.
-"""
-function main()
-  tsp_dict = load_tsp("./all/eil51.tsp")
-  # tabu
-  print(tabu_search(tsp_dict, k_random(tsp_dict, 100)[1], "0", 0.0, 10, tsp_dict[:dimension]))
-end
-
-if abspath(PROGRAM_FILE) == @__FILE__
-  main()
+  include("../1/main.jl")
+  include("./move.jl")
 end
