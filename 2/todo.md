@@ -27,18 +27,20 @@
 
 ## czwartek 21.04.2022
 #### Elementy algorytmu:
-- [ ] kryterium aspiracji
+- [x] kryterium aspiracji
 - [ ] pamięc długoterminowa
 
 #### Dobieranie długości tabu list:
-- [ ] stały dla wszystkich instancji (np. 10)
-- [ ] zależny od wielkości instancji
+- [x] stały dla wszystkich instancji (np. 10)
+- [x] zależny od wielkości instancji
 
 #### Akceleracja liczenia:
-- [ ] invert
-- [ ] swap
-- [ ] insert
+- [x] invert
+- [x] swap
+- [x] insert
 ```
   symetryczne -> asymetryczne (parametr żeby zmieniać, implementacja na później)
 ```
 
+#### Utils:
+- [x] zmiana kolejki na listę

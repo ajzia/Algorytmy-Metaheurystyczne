@@ -22,7 +22,7 @@ module TabuSearch
   - `Float64`: path's weight.
 
   """
-  function tabu_search(starting_path::Vector{T}, move::Function, stop_cond::String, max::Int, tabu_size::String, nodes::Int, weights::AbstractMatrix{Float64}, asp::Float64) where T<:Integer
+  function tabu_search(starting_path::Vector{Int}, move::Function, stop_cond::String, max::Int, tabu_size::String, nodes::Int, weights::AbstractMatrix{Float64}, asp::Float64)
     @assert asp > 0 && asp < 1
     
     stops = ["it", "time", "dest", "best"]; @assert stop_cond in stops
@@ -52,7 +52,7 @@ module TabuSearch
     global_best_length = local_best_length = current_length = selected_path_length = starting_length
 
     # tabu list & matrix
-    tabu_list = Array{Vector{Int}} = [[-1, -1] for i in 1:tabu_size]
+    tabu_list::Array{Vector{Int}} = [[-1, -1] for i in 1:tabu_size]
     for _ in 1:tabu_size enqueue!(tabu_list, [-1, -1]) end
     tabu_matrix::Vector{BitVector} = [BitVector([0 for _ in 1:nodes]) for _ in 1:nodes]
     
