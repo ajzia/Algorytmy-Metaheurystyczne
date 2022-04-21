@@ -22,9 +22,18 @@ module TabuSearch
   - `Float64`: path's weight.
 
   """
-  function tabu_search(starting_path::Vector{T}, move::Function, stop_cond::String, max::Int, tabu_size::Int, nodes::Int, weights::AbstractMatrix{Float64}) where T<:Integer
+  function tabu_search(starting_path::Vector{T}, move::Function, stop_cond::String, max::Int, tabu_size::String, nodes::Int, weights::AbstractMatrix{Float64}, asp::Float64) where T<:Integer
+    @assert asp > 0 && asp < 1
+    
     stops = ["it", "time", "dest", "best"]; @assert stop_cond in stops
     stats = Dict(); for s in stops stats[s] = 0 end
+
+
+    if tabu_size == "rel" # relative to the problem size
+      tabu_size = cld(nodes, 5)
+    else # static 
+      tabu_size = parse(Int, tabu_list)
+    end
 
     starting_length = calculate_path(starting_path, weights)
 
@@ -43,22 +52,31 @@ module TabuSearch
     global_best_length = local_best_length = current_length = selected_path_length = starting_length
 
     # tabu list & matrix
-    tabu_list = Queue{Vector{Int}}()
+    tabu_list = Array{Vector{Int}} = [[-1, -1] for i in 1:tabu_size]
     for _ in 1:tabu_size enqueue!(tabu_list, [-1, -1]) end
     tabu_matrix::Vector{BitVector} = [BitVector([0 for _ in 1:nodes]) for _ in 1:nodes]
     
     ij = [-1, -1]
 
     while true
+      from_asp = false
       for i in 1:nodes-1, j in i+1:nodes
-        if tabu_matrix[i][j] continue end
+        #if tabu_matrix[i][j] continue end
         current_path = move(selected_path, i, j)
         current_length = calculate_path(current_path, weights); stats["dest"] += 1
 
-        if current_length < local_best_length
+        if (!tabu_matrix[i][j] && current_length < local_best_length) || (tabu_matrix[i][j] && current_length < asp * global_best_length)
           local_best_path = copy(current_path)
           local_best_length = current_length
           ij = [i, j]
+
+          if(tabu_matrix[i][j])
+            from_asp = true
+            tabu_matrix[i][j] = false;
+            tabu_matrix[j][i] = false;
+            tabu_list.delete(ij)
+            deleteat!(tabu_list, findfirst(x -> x=="s", tabu_list))
+          end
         end
       end
 
@@ -71,7 +89,8 @@ module TabuSearch
       selected_path = local_best_path
       selected_path_length = local_best_length
 
-      x = dequeue!(tabu_list); enqueue!(tabu_list, ij) # tabu list
+      if !from_asp x = popfirst!(tabu_list) end
+      push!(tabu_list, ij) # tabu list (nie chcemy usuwac 1 jesli best jest z aspiracji - do zmiany)
       tabu_matrix[ij[1]][ij[2]] = tabu_matrix[ij[2]][ij[1]] = true
 
       if x != [-1, -1]
