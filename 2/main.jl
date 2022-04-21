@@ -12,7 +12,7 @@ function main(args)
 
   tsp_dict = load_tsp("./all/$(args[1]).tsp")
   
-  path, distance = tabu_search(repetitive_nearest_neighbour(tsp_dict)[1], insert, "it", 1000.0, 10, tsp_dict[:dimension], tsp_dict[:weights])
+  path, distance = tabu_search(repetitive_nearest_neighbour(tsp_dict)[1], swap, "it", 1000, 10, tsp_dict[:dimension], tsp_dict[:weights])
   println("Path: $path\nDistance: $distance")
 end
 

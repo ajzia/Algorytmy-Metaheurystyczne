@@ -1,4 +1,4 @@
-# dzisiejsza lista tabu: przepraszam, sorry, sory, sorki 
+# dzisiejsza lista tabu: wszystkie brzydkie słowa
 module TabuSearch
   using DataStructures 
 
@@ -22,7 +22,7 @@ module TabuSearch
   - `Float64`: path's weight.
 
   """
-  function tabu_search(starting_path::Vector{T}, move::Function, stop_cond::String, max::Float64, tabu_size::Int, nodes::Int, weights::AbstractMatrix{Float64}) where T<:Integer
+  function tabu_search(starting_path::Vector{T}, move::Function, stop_cond::String, max::Int, tabu_size::Int, nodes::Int, weights::AbstractMatrix{Float64}) where T<:Integer
     stops = ["it", "time", "dest", "best"]; @assert stop_cond in stops
     stats = Dict(); for s in stops stats[s] = 0 end
 
@@ -50,9 +50,6 @@ module TabuSearch
     ij = [-1, -1]
 
     while true
-      stats["it"] += 1
-      if stats[stop_cond] > max return global_best_path, global_best_length end
-
       for i in 1:nodes-1, j in i+1:nodes
         if tabu_matrix[i][j] continue end
         current_path = move(selected_path, i, j)
