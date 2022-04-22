@@ -24,14 +24,14 @@ end
   Returns path's weight.
 
 ## Parameters:
-- `path::Vector{T<:Integer}`: path with a given order of visited nodes.
+- `path::Vector{Int}`: path with a given order of visited nodes.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
 
 ## Returns:
 - Sum of weights between nodes in the path.
 
 """
-function calculate_path(path::Vector{T}, weights::AbstractMatrix{Float64}) where T<:Integer
+function calculate_path(path::Vector{Int}, weights::AbstractMatrix{Float64})
   @assert isperm(path) "Invalid path"
   distance = weights[path[end], path[1]]
   for i in 1:length(path)-1
@@ -46,7 +46,7 @@ end
 
 ## Parameters:
 - `tsp_dict::Dict`: `TSP` dataset.
-- `k::{Int}`: the number of repetitions.
+- `k::Int`: the number of repetitions.
 
 ## Returns:
 - The best path and its length found from `k` repetitions.
@@ -67,20 +67,20 @@ function k_random(tsp_dict::Dict, k::Int)
 end
 
 """
-    nearest_neighbour(node, dimension, weights) -> (Array{Float64}, Float64)
+    nearest_neighbour(node, dimension, weights) -> (Vector{Int}, Float64)
   Calculates the best path using nearest neighbour algorithm with a given starting node.
 
 ## Parameters:
 - `node::Int`: starting node.
-- `dimension::Int`: number of nodes in a path.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
 
 ## Returns:
-- `Array{Int64}`: the best path found.
+- `Vector{Int}`: the best path found.
 - `Float64`: path's weight.
 
 """
-function nearest_neighbour(node::Int, dimension::Int, weights::AbstractMatrix{Float64})
+function nearest_neighbour(node::Int, weights::AbstractMatrix{Float64})
+  dimension = size(weights, 1)
   @assert node <= dimension && node > 0
   
   non_visited = collect(1:dimension)
@@ -109,15 +109,14 @@ function nearest_neighbour(node::Int, dimension::Int, weights::AbstractMatrix{Fl
 end
 
 """
-    repetitive_nearest_neighbour(tsp_dict) -> (Array{Float64}, Float64)
+    repetitive_nearest_neighbour(tsp_dict) -> (Vector{Int}, Float64)
   Returns the best path using nearest neighbour algorithm, having `i = 1,2,...,n` as a starting node.
 
 ## Parameters:
-- `dimension::Int`: number of nodes in a path.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
 
 ## Returns:
-- `Array{Int64}`: the best path found.
+- `Vector{Int}`: the best path found.
 - `Float64`: path's weight.
 
 """
@@ -126,7 +125,7 @@ function repetitive_nearest_neighbour(tsp_dict::Dict)
   min_length = Float64
 
   for i in 1:tsp_dict[:dimension]
-    path, length = nearest_neighbour(i, tsp_dict[:dimension], tsp_dict[:weights])
+    path, length = nearest_neighbour(i, tsp_dict[:weights])
     best_path, min_length = (i == 1 || min_length > length) ? (path, length) : (best_path, min_length)
   end
   return (best_path, min_length)
@@ -138,14 +137,14 @@ end
 
 ## Parameters:
 - `tsp_dict::Dict`: `TSP` dataset.
-- `path::Vector{T<:Integer}`: the path to improve.
+- `path::Vector{Int}`: the path to improve.
   
 ## Returns:
-- `Array{Int64}`: the best path found.
+- `Vector{Int}`: the best path found.
 - `Float64`: path's weight.
 
 """
-function two_opt(tsp_dict::Dict, path::Vector{T}) where T<:Integer
+function two_opt(tsp_dict::Dict, path::Vector{Int})
   best_path = copy(path)
   min_length = calculate_path(path, tsp_dict[:weights])
   better = true
@@ -168,13 +167,13 @@ function two_opt(tsp_dict::Dict, path::Vector{T}) where T<:Integer
 end
 
 """
-    tsp_test(name, f, tsp_dict)
+    tsp_test(name, func, tsp_dict)
   Runs test for a given algorithm with `tsp_dict`.
   Requires function `func` to determine the best path for the algorithm.
 
 ## Parameters:
-- `name::{String}`: name of the algorithm.
-- `func::{Function}`: function used to calculate a path.
+- `name::String`: name of the algorithm.
+- `func::Function`: function used to calculate a path.
 - `tsp_dict::Dict`: `TSP` dataset.
 
 """
@@ -204,7 +203,6 @@ function main()
 
   # 2-OPT test
   tsp_test("two-opt", two_opt, tsp_dict, repetitive_nearest_neighbour(tsp_dict)[1])
-  
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

@@ -35,7 +35,7 @@ function testing()
     tsp_dict = struct_to_dict(tsp)
     n = tsp_dict[:dimension]
     append!(length_dict[:n], n)
-    nn_s = two_opt(tsp_dict, nearest_neighbour(1, tsp_dict[:dimension], tsp_dict[:weights])[1])[2]
+    nn_s = two_opt(tsp_dict, nearest_neighbour(1, tsp_dict[:weights])[1])[2]
     rnn_s = two_opt(tsp_dict, repetitive_nearest_neighbour(tsp_dict)[1])[2]
     append!(length_dict[:nn], nn_s)
     append!(length_dict[:rnn], rnn_s)
@@ -98,4 +98,3 @@ end
 if abspath(PROGRAM_FILE) == @__FILE__
   main()
 end
-
