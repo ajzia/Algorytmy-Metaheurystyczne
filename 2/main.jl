@@ -12,13 +12,10 @@ function main(args)
 
   tsp_dict = load_tsp("./all/$(args[1]).tsp")
   
-  path, dist = repetitive_nearest_neighbour(tsp_dict)
-  x::Vector{Int}, y = swap(path, (3,5), dist, tsp_dict[:weights])
-  
-  println("Korekta sciezki: $y")
-  println("Liczenie calej: $(calculate_path(x, tsp_dict[:weights]))")
-  # path, distance = tabu_search(repetitive_nearest_neighbour(tsp_dict)[1], swap, "it", 1000, 10, tsp_dict[:dimension], tsp_dict[:weights])
-  # println("Path: $path\nDistance: $distance")
+  path = nearest_neighbour(2, tsp_dict[:weights])[1] 
+
+  path, distance = tabu_search(path, invert, ("it", 1000), ("rel", 10), 0.01, tsp_dict[:weights])
+  println("Path: $path\nDistance: $distance")
 end
 
 if abspath(PROGRAM_FILE) == @__FILE__

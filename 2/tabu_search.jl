@@ -11,29 +11,33 @@ module TabuSearch
   export swap, invert, insert
 
   """
-      tabu_search(duzo argumentow) -> (costam)
-    Returns the best found path.
+      tabu_search(starting_path, move, stop, tabu_size, asp, weights) -> (Vector{Int}, Float64)
+    The algorithm returns the best permutation of the `path` it can find, having `starting_path` as a starting point.
 
   ## Parameters:
-  - `path::Vector{T<:Integer}`: the path to improve.
+  - `starting_path::Vector{Int}`: the path to improve.
+  - `move::Function`: type of movement.
+  - `stop::Tuple{String, Int}`: type of stop criterion and its limit.
+  - `list_size::Tuple{String, Int}`: type of tabu list length and it's parameter.
+  - `asp::Float64`: value of the aspiration criterion.
+  - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
     
   ## Returns:
-  - `Array{Int64}`: the best path found.
-  - `Float64`: path's weight.
+  - `Vector{Int}`: the best path found.
+  - `Float64`: the path's weight.
 
   """
-  function tabu_search(starting_path::Vector{Int}, move::Function, stop_cond::String, max::Int, tabu_size::String, nodes::Int, weights::AbstractMatrix{Float64}, asp::Float64)
+  function tabu_search(starting_path::Vector{Int}, move::Function, stop::Tuple{String, Int}, list_size::Tuple{String, Int}, asp::Float64, weights::AbstractMatrix{Float64})
+    println("Parameters: \nMove: $move \nStop criterion: \"$(stop[1])\", and max: $(stop[2]) \nType \"$(list_size[1])\", and size of tabu list: $(list_size[2]) \nAspiration: $asp\n")
     @assert asp > 0 && asp < 1
     
+    stop_cond, max = stop; nodes = size(weights, 1)
+
     stops = ["it", "time", "dest", "best"]; @assert stop_cond in stops
     stats = Dict(); for s in stops stats[s] = 0 end
 
-
-    if tabu_size == "rel" # relative to the problem size
-      tabu_size = cld(nodes, 5)
-    else # static 
-      tabu_size = parse(Int, tabu_list)
-    end
+    sizes = ["rel", "stat"]; @assert list_size[1] in sizes
+    tabu_size = list_size[1] == "rel" ? cld(nodes, list_size[2]) : list_size[2]
 
     starting_length = calculate_path(starting_path, weights)
 
@@ -53,7 +57,6 @@ module TabuSearch
 
     # tabu list & matrix
     tabu_list::Array{Vector{Int}} = [[-1, -1] for i in 1:tabu_size]
-    for _ in 1:tabu_size enqueue!(tabu_list, [-1, -1]) end
     tabu_matrix::Vector{BitVector} = [BitVector([0 for _ in 1:nodes]) for _ in 1:nodes]
     
     ij = [-1, -1]
@@ -61,21 +64,18 @@ module TabuSearch
     while true
       from_asp = false
       for i in 1:nodes-1, j in i+1:nodes
-        #if tabu_matrix[i][j] continue end
-        current_path = move(selected_path, i, j)
-        current_length = calculate_path(current_path, weights); stats["dest"] += 1
+        current_path, current_length = move(selected_path, (i, j), global_best_length, weights)
+        stats["dest"] += 1
 
         if (!tabu_matrix[i][j] && current_length < local_best_length) || (tabu_matrix[i][j] && current_length < asp * global_best_length)
           local_best_path = copy(current_path)
           local_best_length = current_length
           ij = [i, j]
 
-          if(tabu_matrix[i][j])
+            if(tabu_matrix[i][j])
             from_asp = true
-            tabu_matrix[i][j] = false;
-            tabu_matrix[j][i] = false;
-            tabu_list.delete(ij)
-            deleteat!(tabu_list, findfirst(x -> x=="s", tabu_list))
+            tabu_matrix[i][j] = tabu_matrix[j][i] = false;
+            deleteat!(tabu_list, findfirst(x -> x == ij, tabu_list))
           end
         end
       end
@@ -86,8 +86,7 @@ module TabuSearch
         stats["best"] = 0
       else stats["best"] += 1 end
         
-      selected_path = local_best_path
-      selected_path_length = local_best_length
+      selected_path, selected_path_length = local_best_path, local_best_length
 
       if !from_asp x = popfirst!(tabu_list) end
       push!(tabu_list, ij) # tabu list (nie chcemy usuwac 1 jesli best jest z aspiracji - do zmiany)
@@ -105,4 +104,4 @@ module TabuSearch
 
   include("../1/main.jl")
   include("./move.jl")
-end
+end # module
