@@ -4,7 +4,7 @@
 
 ## Parameters:
 - `pathway::Vector{Int}`: path with a given order of visited nodes.
-- `move::Tuple{Int, Int}`: move to make, tuple of path's indexes `i` and `j`.
+- `move::Array{Int}`: move to make, tuple of path's indexes `i` and `j`.
 - `distance::Float64`: orignal path's distance.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
   
@@ -13,8 +13,9 @@
 - `Float64`: lenght of the changed path.
 
 """
-function swap(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, weights::AbstractMatrix{Float64})#, flag::Bool)
-  i, j = move; nodes = size(weights, 1); path = copy(pathway)
+function swap(pathway::Vector{Int}, move::Array{Int}, distance::Float64, weights::AbstractMatrix{Float64})#, flag::Bool)
+  i, j = move[1], move[2]; nodes = size(weights, 1); path = copy(pathway)
+  if i > j i, j = j, i end
   path[i], path[j] = path[j], path[i] 
 
   prev_i = i == 1 ? nodes : i - 1
@@ -47,7 +48,7 @@ end
 
 ## Parameters:
 - `pathway::Vector{Int}`: path with a given order of visited nodes.
-- `move::Tuple{Int, Int}`: move to make, tuple of pathway's indexes `i` and `j`.
+- `move::Array{Int}`: move to make, tuple of pathway's indexes `i` and `j`.
 - `distance::Float64`: orignal path's distance.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
   
@@ -56,8 +57,8 @@ end
 - `Float64`: lenght of the changed path.
 
 """
-function invert(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, weights::AbstractMatrix{Float64})#, flag::Bool)
-  i, j = move; nodes = size(weights, 1); path = copy(pathway)
+function invert(pathway::Vector{Int}, move::Array{Int}, distance::Float64, weights::AbstractMatrix{Float64})#, flag::Bool)
+  i, j = move[1], move[2]; nodes = size(weights, 1); path = copy(pathway)
   reverse!(path, i, j)
 
   if (i == 1 && j == nodes) return path, distance end
@@ -83,7 +84,7 @@ end
 
 ## Parameters:
 - `pathway::Vector{Int}`: path with a given order of visited nodes.
-- `move::Tuple{Int, Int}`: move to make, tuple of pathway's indexes `i` and `j`.
+- `move::Array{Int}`: move to make, tuple of pathway's indexes `i` and `j`.
 - `distance::Float64`: orignal path's distance.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
   
@@ -92,8 +93,8 @@ end
 - `Float64`: lenght of the changed path.
 
 """
-function insert(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, weights::AbstractMatrix{Float64})#, flag::Bool)
-  i, j = move; nodes = size(weights, 1); path = copy(pathway)
+function insert(pathway::Vector{Int}, move::Array{Int}, distance::Float64, weights::AbstractMatrix{Float64})#, flag::Bool)
+  i, j = move[1], move[2]; nodes = size(weights, 1); path = copy(pathway)
 
   temp = path[i]
   deleteat!(path, i)
@@ -117,4 +118,34 @@ function insert(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, 
   path_length += weights[path[j], path[next_j]]
 
   return path, path_length
+end
+
+function uno_reverse(best::Tuple{Vector{Int}, Float64}, move::Function, matrix::Vector{BitVector}, tabu::Array{Vector{Int}}, memory_list, weights::AbstractMatrix{Float64})
+  path, distance = best
+  for _ in 1:length(tabu)
+    x = popfirst!(tabu)
+    if x != [-1, -1] matrix[x[1]][x[2]] = matrix[x[2]][x[1]] = false end
+  end
+
+  ij, tabu = memory_list[end]
+  # println("ij   $ij")
+  # println(memory_list[end])
+  deleteat!(memory_list, length(memory_list))
+  
+  # print("MEMORY LIST:    ")
+
+  for i in 1:length(tabu)
+    x = tabu[i]
+    if x != [-1, -1] matrix[x[1]][x[2]] = matrix[x[2]][x[1]] = true end
+  end
+
+  popfirst!(tabu)
+  push!(tabu, ij)
+  if ij != [-1, -1] matrix[ij[1]][ij[2]] = matrix[ij[2]][ij[1]] = true end
+  # println(matrix[5][6])
+
+  # println(memory_list)
+  path, distance = move(path, [ij[1], ij[2]], distance, weights)
+  @assert distance == calculate_path(path, weights)
+  return path, distance, tabu
 end

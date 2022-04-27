@@ -52,17 +52,23 @@
 
 - [x] zmiana kolejki na listę
 
-## piątek 22.04.2022...
+## piątek 22.04.2022... środa 27.04.2022
 
 #### Tabu search:
 
 - [x] komentarz do funkcji
 - [x] refractor przyjmowania parametrów
+- [ ] pamięć długoterminowa
+- [ ] wielowątkowość
+
+```
+  -> wykorzystanie wątków do przeglądania sąsiedztwa -> poprawić
+```
 
 #### Move:
 
 - [x] komentarze do funkcji
-- [ ] look into: generowanie funkcji w funkcji
+<!-- - [ ] look into: generowanie funkcji w funkcji  -->
 
 #### Implementacja deterministyczna vs probabilistyczna:
 
@@ -71,7 +77,7 @@
   1. [ ] cofnięta o kilka ruchów, z wymuszeniem wybrania innej ścieżki
   2. [ ] shuffle na global_path
 
-#### Utils:
+#### Utils: (przy zajmowaniu się badaniami, 28.04-04.05)
 
 - [ ] generowanie danych
   1. [ ] symetrycznych (euklidesowych)
@@ -79,6 +85,9 @@
 
 #### Poprzednie:
 
+- [x] przejrzeć kryterium aspiracji - sprawdzić poprawność działania
 - [ ] kryterium stopu time
-- [ ] pamięć długoterminowa
-- [ ] przejrzeć kryterium aspiracji - sprawdzić poprawność działania
+
+```
+  -> przypisywanie czasu do zmiennej
+```
