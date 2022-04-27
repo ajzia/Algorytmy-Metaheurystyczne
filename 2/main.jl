@@ -14,7 +14,7 @@ function main(args)
   
   path = nearest_neighbour(2, tsp_dict[:weights])[1] 
 
-  path, distance = tabu_search(path, invert, ("it", 1000), ("stat", 7), 0.9, tsp_dict[:weights])
+  path, distance = tabu_search(path, insert, ("it", 10000), ("stat", 7), 0.1, tsp_dict[:weights])
   println("Path: $path\nDistance: $distance")
   println(calculate_path(path, tsp_dict[:weights]))
 end

@@ -59,6 +59,7 @@ end
 """
 function invert(pathway::Vector{Int}, move::Array{Int}, distance::Float64, weights::AbstractMatrix{Float64})#, flag::Bool)
   i, j = move[1], move[2]; nodes = size(weights, 1); path = copy(pathway)
+  if i > j i, j = j, i end
   reverse!(path, i, j)
 
   if (i == 1 && j == nodes) return path, distance end
@@ -96,9 +97,13 @@ end
 function insert(pathway::Vector{Int}, move::Array{Int}, distance::Float64, weights::AbstractMatrix{Float64})#, flag::Bool)
   i, j = move[1], move[2]; nodes = size(weights, 1); path = copy(pathway)
 
+  if i > j println("i = $i, j = $j\nBefore insert: ", path) end
+
   temp = path[i]
   deleteat!(path, i)
   insert!(path, j, temp)
+
+  if i > j println("After insert: ", path) end
 
   if (i == 1 && j == nodes) return path, distance end
 
@@ -107,16 +112,24 @@ function insert(pathway::Vector{Int}, move::Array{Int}, distance::Float64, weigh
   prev_i = i == 1 ? nodes : i - 1
   prev_j = j == 1 ? nodes : j - 1
   next_j = j == nodes ? 1 : j + 1
+  next_i = i == nodes ? 1 : i + 1
 
   path_length = distance
-  path_length -= weights[path[prev_i], path[j]]
-  path_length -= weights[path[i], path[j]]
+  if i < j
+    path_length -= weights[path[prev_i], path[j]]
+    path_length -= weights[path[i], path[j]]
+  else
+    path_length -= weights[path[i], path[j]]
+    path_length -= weights[path[next_i], path[j]]
+  end
   path_length -= weights[path[prev_j], path[next_j]]
   
-  path_length += weights[path[prev_i], path[i]]
+  if i < j path_length += weights[path[prev_i], path[i]]
+  else path_length += weights[path[i], path[next_i]] end
   path_length += weights[path[prev_j], path[j]]
   path_length += weights[path[j], path[next_j]]
 
+  @assert path_length == calculate_path(path, weights)
   return path, path_length
 end
 
@@ -144,8 +157,8 @@ function uno_reverse(best::Tuple{Vector{Int}, Float64}, move::Function, matrix::
   if ij != [-1, -1] matrix[ij[1]][ij[2]] = matrix[ij[2]][ij[1]] = true end
   # println(matrix[5][6])
 
-  # println(memory_list)
-  path, distance = move(path, [ij[1], ij[2]], distance, weights)
+  println("--- ij: ", ij, ", path ", path, ", distance: ", distance)
+  path, distance = move(path, [ij[2], ij[1]], distance, weights)
   @assert distance == calculate_path(path, weights)
   return path, distance, tabu
 end

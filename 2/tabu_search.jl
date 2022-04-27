@@ -75,7 +75,7 @@ module TabuSearch
         # Threads.@threads 
         for j in i+1:nodes
           # lock(lk)
-          current_path, current_length = move(selected_path, [i, j], global_best_length, weights)
+          current_path, current_length = move(selected_path, [i, j], selected_path_length, weights)
           stats["dest"] += 1
           
           if (!tabu_matrix[i][j] && current_length < local_best_length) || (tabu_matrix[i][j] && current_length < (1 - asp) * global_best_length)
@@ -101,10 +101,10 @@ module TabuSearch
         stats["best"] = 0
       else 
         stats["best"] += 1 
-        if stats["best"] % 50 == 0 && memory_list != []
+        if stats["best"] % 1000 == 0 && memory_list != []
           println("============================")
           println("BEFORE ", tabu_list)
-          local_best_path, local_best_length, tabu_list = uno_reverse((global_best_path, global_best_length), move, tabu_matrix, tabu_list, memory_list, weights)
+          local_best_path, local_best_length, tabu_list = uno_reverse((local_best_path, local_best_length), move, tabu_matrix, tabu_list, memory_list, weights)
           println("AFTER: $tabu_list")
           println("============================")
           println(local_best_length)
