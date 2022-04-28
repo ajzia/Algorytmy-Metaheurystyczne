@@ -1,4 +1,4 @@
-# dzisiejsza lista tabu: przezwiska
+# dzisiejsza lista tabu: wkurzanie sie na innych
 module TabuSearch
   using TimesDates  
 
@@ -28,7 +28,6 @@ module TabuSearch
 
   """
   function tabu_search(starting_path::Vector{Int}, move::Function, stop::Tuple{String, Int}, list_size::Tuple{String, Int}, asp::Float64, weights::AbstractMatrix{Float64})
-    println("Parameters: \nMove: $move \nStop criterion: \"$(stop[1])\", and max: $(stop[2]) \nType \"$(list_size[1])\", and size of tabu list: $(list_size[2]) \nAspiration: $asp\n")
     @assert asp > 0 && asp < 1
     
     begin
@@ -59,14 +58,14 @@ module TabuSearch
       # tabu list & matrix
       tabu_list::Array{Vector{Int}} = [[-1, -1] for i in 1:tabu_size]
       tabu_matrix::Vector{BitVector} = [BitVector([0 for _ in 1:nodes]) for _ in 1:nodes]
-      
     end
+
     # lk = ReentrantLock()
 
     memory_list::Array = []
-    # x = [[1,2,3], [3,4]]
-    # append!(long_tabu_list, x)
 
+    println("Parameters: \nMove: $move \nStop criterion: \"$(stop[1])\", and max: $(stop[2]) \nType \"$(list_size[1])\", and size of tabu list: $(tabu_size) \nAspiration: $asp\n")
+    
     while true
       ij = [-1, -1]
       from_asp = false
@@ -90,25 +89,16 @@ module TabuSearch
           end
           # unlock(lk)
         end
-      end
+      end # for
 
       if local_best_length < global_best_length
         global_best_path, global_best_length = copy(local_best_path), local_best_length
-
-        println("best ", global_best_length)
-
         push!(memory_list, [ij, copy(tabu_list)])
         stats["best"] = 0
       else 
         stats["best"] += 1 
         if stats["best"] % 1000 == 0 && memory_list != []
-          println("============================")
-          println("BEFORE ", tabu_list)
-          local_best_path, local_best_length, tabu_list = uno_reverse((local_best_path, local_best_length), move, tabu_matrix, tabu_list, memory_list, weights)
-          println("AFTER: $tabu_list")
-          println("============================")
-          println(local_best_length)
-          # local_best_path, local_best_length = copy(global_best_path), global_best_length 
+          local_best_path, local_best_length, tabu_list = uno_reverse((local_best_path, local_best_length), move, tabu_list, memory_list, tabu_matrix, weights)
           ij = [-1, -1]
         end 
       end
@@ -119,7 +109,7 @@ module TabuSearch
         if !from_asp x = popfirst!(tabu_list) 
         else x = [-1,-1] end
 
-        push!(tabu_list, ij) # tabu list (nie chcemy usuwac 1 jesli best jest z aspiracji - do zmiany)
+        push!(tabu_list, ij)
         if ij != [-1, -1] tabu_matrix[ij[1]][ij[2]] = tabu_matrix[ij[2]][ij[1]] = true end
         if x != [-1, -1] tabu_matrix[x[1]][x[2]] = tabu_matrix[x[2]][x[1]] = false end
       end
