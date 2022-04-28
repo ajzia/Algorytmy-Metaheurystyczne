@@ -4,8 +4,8 @@
 
 ## Parameters:
 - `pathway::Vector{Int}`: path with a given order of visited nodes.
-- `move::Array{Int}`: move to make, tuple of path's indexes `i` and `j`.
-- `distance::Float64`: orignal path's distance.
+- `move::Array{Int}`: move to make, array of path's indexes `i` and `j`.
+- `distance::Float64`: original path's distance.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
   
 ## Returns:
@@ -48,8 +48,8 @@ end
 
 ## Parameters:
 - `pathway::Vector{Int}`: path with a given order of visited nodes.
-- `move::Array{Int}`: move to make, tuple of pathway's indexes `i` and `j`.
-- `distance::Float64`: orignal path's distance.
+- `move::Array{Int}`: move to make, array of pathway's indexes `i` and `j`.
+- `distance::Float64`: original path's distance.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
   
 ## Returns:
@@ -81,12 +81,12 @@ end
 
 """
     insert(pathway, move, distance, weights) -> (Vector{Int}, Float64)
-  Inserts element from `i`-th position to the `j`-th position in the path and calculates its lenght.
+  Inserts element from `i`-th position to the `j`-th position in the path and calculates its length.
 
 ## Parameters:
 - `pathway::Vector{Int}`: path with a given order of visited nodes.
-- `move::Array{Int}`: move to make, tuple of pathway's indexes `i` and `j`.
-- `distance::Float64`: orignal path's distance.
+- `move::Array{Int}`: move to make, array of pathway's indexes `i` and `j`.
+- `distance::Float64`: original path's distance.
 - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
   
 ## Returns:
@@ -97,13 +97,9 @@ end
 function insert(pathway::Vector{Int}, move::Array{Int}, distance::Float64, weights::AbstractMatrix{Float64})#, flag::Bool)
   i, j = move[1], move[2]; nodes = size(weights, 1); path = copy(pathway)
 
-  if i > j println("i = $i, j = $j\nBefore insert: ", path) end
-
   temp = path[i]
   deleteat!(path, i)
   insert!(path, j, temp)
-
-  if i > j println("After insert: ", path) end
 
   if (i == 1 && j == nodes) return path, distance end
 
@@ -133,7 +129,24 @@ function insert(pathway::Vector{Int}, move::Array{Int}, distance::Float64, weigh
   return path, path_length
 end
 
-function uno_reverse(best::Tuple{Vector{Int}, Float64}, move::Function, matrix::Vector{BitVector}, tabu::Array{Vector{Int}}, memory_list, weights::AbstractMatrix{Float64})
+"""
+    uno_reverse(best, move, tabu, memory_list, matrix, weights) -> (Vector{Int}, Float64)
+  Reverts the move to get previous best path and pushes it into tabu to prevent the algorithm from choosing the same path.
+
+## Parameters:
+- `best::Tuple{Vector{Int}`: current best path and it's distance.
+- `move::Function`: type of movement.
+- `tabu::Array{Vector{Int}}`: short-memory tabu list.
+- `memory_list::Vector{Any}`: long-memory tabu list.
+- `matrix::Vector{BitVector}`: indicates whether a move is tabu or not.
+- `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
+  
+## Returns:
+- `Vector{Int}`: reconstructed path.
+- `Float64`: lenght of the reconstructed path.
+
+"""
+function uno_reverse(best::Tuple{Vector{Int}, Float64}, move::Function, tabu::Array{Vector{Int}}, memory_list::Vector{Any}, matrix::Vector{BitVector}, weights::AbstractMatrix{Float64})
   path, distance = best
   for _ in 1:length(tabu)
     x = popfirst!(tabu)
@@ -141,12 +154,8 @@ function uno_reverse(best::Tuple{Vector{Int}, Float64}, move::Function, matrix::
   end
 
   ij, tabu = memory_list[end]
-  # println("ij   $ij")
-  # println(memory_list[end])
   deleteat!(memory_list, length(memory_list))
   
-  # print("MEMORY LIST:    ")
-
   for i in 1:length(tabu)
     x = tabu[i]
     if x != [-1, -1] matrix[x[1]][x[2]] = matrix[x[2]][x[1]] = true end
@@ -155,10 +164,7 @@ function uno_reverse(best::Tuple{Vector{Int}, Float64}, move::Function, matrix::
   popfirst!(tabu)
   push!(tabu, ij)
   if ij != [-1, -1] matrix[ij[1]][ij[2]] = matrix[ij[2]][ij[1]] = true end
-  # println(matrix[5][6])
 
-  println("--- ij: ", ij, ", path ", path, ", distance: ", distance)
   path, distance = move(path, [ij[2], ij[1]], distance, weights)
-  @assert distance == calculate_path(path, weights)
   return path, distance, tabu
 end

@@ -31,7 +31,7 @@
 #### Elementy algorytmu:
 
 - [x] kryterium aspiracji
-- [ ] pamięc długoterminowa
+<!-- - [ ] pamięc długoterminowa -->
 
 #### Dobieranie długości tabu list:
 
@@ -52,13 +52,42 @@
 
 - [x] zmiana kolejki na listę
 
-## piątek 22.04.2022... środa 27.04.2022
+## piątek 22.04.2022
 
 #### Tabu search:
 
 - [x] komentarz do funkcji
 - [x] refractor przyjmowania parametrów
-- [ ] pamięć długoterminowa
+
+#### Move:
+
+- [x] komentarze do funkcji
+<!-- - [ ] look into: generowanie funkcji w funkcji  -->
+
+## środa 27.04.2022
+
+#### Tabu search:
+
+- [x] przejrzeć kryterium aspiracji - sprawdzić poprawność działania
+- [x] pamięć długoterminowa
+- [ ] wielowątkowość
+
+```
+  -> wykorzystanie wątków do przeglądania sąsiedztwa
+```
+
+<!-- ### Skip - niepolecane przez prof. Bożejko
+#### Implementacja deterministyczna vs probabilistyczna:
+
+- [ ] kilkukrotne osiągnięcie kryt. stopu - liczenie średniej z liczby podejść
+- [ ] ścieżka, od której zaczynamy nowe podejście
+  1. [ ] cofnięta o kilka ruchów, z wymuszeniem wybrania innej ścieżki
+  2. [ ] shuffle na global_path -->
+
+## czwartek i dalej 28.04.2022
+
+#### Tabu search:
+
 - [ ] wielowątkowość
 
 ```
@@ -67,27 +96,21 @@
 
 #### Move:
 
-- [x] komentarze do funkcji
-<!-- - [ ] look into: generowanie funkcji w funkcji  -->
+- [x] komentarz do funkcji `uno_reverse(...)`
 
-#### Implementacja deterministyczna vs probabilistyczna:
+#### Zaległe:
 
-- [ ] kilkukrotne osiągnięcie kryt. stopu - liczenie średniej z liczby podejść
-- [ ] ścieżka, od której zaczynamy nowe podejście
-  1. [ ] cofnięta o kilka ruchów, z wymuszeniem wybrania innej ścieżki
-  2. [ ] shuffle na global_path
-
-#### Utils: (przy zajmowaniu się badaniami, 28.04-04.05)
-
-- [ ] generowanie danych
-  1. [ ] symetrycznych (euklidesowych)
-  2. [ ] asymetrycznych
-
-#### Poprzednie:
-
-- [x] przejrzeć kryterium aspiracji - sprawdzić poprawność działania
 - [ ] kryterium stopu time
 
 ```
   -> przypisywanie czasu do zmiennej
 ```
+
+#### Badania: (28.04-04.05)
+
+- [ ] wybranie najciekawszych statystyk
+- [ ] generowanie i zapisywanie danych
+- [ ] uniwersalne plotowanie
+- [ ] generowanie danych tsp
+  1. [ ] symetrycznych (euklidesowych)
+  2. [ ] asymetrycznych
