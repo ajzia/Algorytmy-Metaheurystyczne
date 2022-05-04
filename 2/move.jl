@@ -146,14 +146,15 @@ end
 - `Float64`: lenght of the reconstructed path.
 
 """
-function uno_reverse(best::Tuple{Vector{Int}, Float64}, move::Function, tabu::Array{Vector{Int}}, memory_list::Vector{Any}, matrix::Vector{BitVector}, weights::AbstractMatrix{Float64})
-  path, distance = best
+function uno_reverse(localBest::Tuple{Vector{Int}, Float64}, move::Function, tabu::Array{Vector{Int}}, memory_list::Vector{Any}, matrix::Vector{BitVector}, weights::AbstractMatrix{Float64})
+  localPath, localDistance = localBest
   for _ in 1:length(tabu)
     x = popfirst!(tabu)
     if x != [-1, -1] matrix[x[1]][x[2]] = matrix[x[2]][x[1]] = false end
   end
 
-  ij, tabu = memory_list[end]
+  
+  ancientPath, ancientDistance, ij, tabu = memory_list[end]
   deleteat!(memory_list, length(memory_list))
   
   for i in 1:length(tabu)
@@ -165,6 +166,6 @@ function uno_reverse(best::Tuple{Vector{Int}, Float64}, move::Function, tabu::Ar
   push!(tabu, ij)
   if ij != [-1, -1] matrix[ij[1]][ij[2]] = matrix[ij[2]][ij[1]] = true end
 
-  path, distance = move(path, [ij[2], ij[1]], distance, weights)
-  return path, distance, tabu
+  localPath, localDistance = move(ancientPath, [ij[2], ij[1]], ancientDistance, weights)
+  return localPath, localDistance, tabu
 end

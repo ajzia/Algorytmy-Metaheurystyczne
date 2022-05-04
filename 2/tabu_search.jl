@@ -27,7 +27,7 @@ module TabuSearch
   - `Float64`: the path's weight.   
 
   """
-  function tabu_search(starting_path::Vector{Int}, move::Function, stop::Tuple{String, Int}, list_size::Tuple{String, Int}, asp::Float64, weights::AbstractMatrix{Float64})
+  function tabu_search(starting_path::Vector{Int}, move::Function, stop::Tuple{String, Int}, list_size::Tuple{String, Int}, long_size::Int, asp::Float64, weights::AbstractMatrix{Float64})
     @assert asp > 0 && asp < 1
     
     begin
@@ -93,8 +93,12 @@ module TabuSearch
 
       if local_best_length < global_best_length
         global_best_path, global_best_length = copy(local_best_path), local_best_length
-        push!(memory_list, [ij, copy(tabu_list)])
+        push!(memory_list, [copy(global_best_path), global_best_length, ij, copy(tabu_list)])
+        if length(memory_list) > long_size
+          popfirst!(memory_list)
+        end
         stats["best"] = 0
+        #println("long size: $(length(memory_list))") # ładnie widać co robimy z long memory
       else 
         stats["best"] += 1 
         if stats["best"] % 1000 == 0 && memory_list != []
