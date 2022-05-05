@@ -21,28 +21,38 @@ function tabu_after_x()
     :legend => Dict(
       :rnn => "repetitive nearest neighbour", 
       :kr => "k - random", 
-      :twoopt => "2 - opt" # rnn, krandom(10000), 2-opt
+      :twoopt => "2 - opt (nn)" # rnn, krandom(10000), 2-opt
     ),
     :save => "length-starting-path",
     :ylabel => "path's length"
   )
 
   max_distance = 100
-  k = 10000
+  k = 1000
+  sampleSize = 4
 
-  for n in 10:10:100
+
+  for n in 10:10:150
     println(n)
-    tsp_dict = generate_dict(n, max_distance, true)
+    
+    rnn_s = 0; kr_s = 0; twoopt_s = 0
 
     append!(length_dict[:n], n)
     
-    rnn_s = tabu_search(repetitive_nearest_neighbour(tsp_dict)[1], invert, ("it", 10000), ("stat", 7), 10, 0.1, tsp_dict[:weights])[2]
-    kr_s = tabu_search(k_random(tsp_dict, k)[1], invert, ("it", 10000), ("stat", 7), 10, 0.1, tsp_dict[:weights])[2]
-    twoopt_s = two_opt(tsp_dict, repetitive_nearest_neighbour(tsp_dict)[1])[2]
+    for _ in 1:sampleSize
+    tsp_dict = generate_dict(n, max_distance, true)
+    #rnnp = repetitive_nearest_neighbour(tsp_dict)[1]
+    #rnnp2 = copy(rnnp)
+    rnn_s += tabu_search(repetitive_nearest_neighbour(tsp_dict)[1], invert, ("it", 1000), ("stat", 7), 10, 0.1, tsp_dict[:weights])[2]
+    kr_s += tabu_search(k_random(tsp_dict, k)[1] , invert, ("it", 1000), ("stat", 7), 10, 0.1, tsp_dict[:weights])[2]
+    twoopt_s += tabu_search(two_opt(tsp_dict, nearest_neighbour(2, tsp_dict[:weights])[1])[1], invert, ("it", 1000), ("stat", 7), 10, 0.1, tsp_dict[:weights])[2]
     
-    append!(length_dict[:y][:rnn], rnn_s)
-    append!(length_dict[:y][:kr], kr_s)
-    append!(length_dict[:y][:twoopt], twoopt_s)
+
+    end
+
+    append!(length_dict[:y][:rnn], rnn_s/sampleSize)
+    append!(length_dict[:y][:kr], kr_s/sampleSize)
+    append!(length_dict[:y][:twoopt], twoopt_s/sampleSize)
     
   end
 
@@ -59,7 +69,7 @@ function improvement_made()
   k = 10000
 
   functions = [k_random, repetitive_nearest_neighbour, two_opt]
-  name = Dict(k_random => "k - random", repetitive_nearest_neighbour => "repetitive nearest neighbour", two_opt => "2 - opt")
+  name = Dict(k_random => "k - random", repetitive_nearest_neighbour => "repetitive nn", two_opt => "2 - opt")
   short = Dict(k_random => "kr", repetitive_nearest_neighbour => "rnn", two_opt => "twoopt")
 
   for func in functions
@@ -77,9 +87,9 @@ function improvement_made()
       :save => short[func] * "_improv",
       :ylabel => "path's length"
     )
-    sampleSize = 10
+    sampleSize = 4
     
-    for n in 10:10:40
+    for n in 10:10:150
       println(short[func], n)
       starts = 0
       tabus = 0
@@ -89,7 +99,7 @@ function improvement_made()
       startPath, startLength = callFunction(func, tsp_dict, k)
       starts += startLength
 
-      tabuLength = tabu_search(startPath, invert, ("it", 10000), ("stat", 7), 10, 0.1, tsp_dict[:weights])[2]     
+      tabuLength = tabu_search(startPath, invert, ("it", 1000), ("stat", 7), 10, 0.1, tsp_dict[:weights])[2]     
       tabus += tabuLength
       end
       append!(data[:n], n)
@@ -126,19 +136,19 @@ end
 - `data_dict::Dict`: dictionary with data from tests. 
 """
 function draw_plot(data_dict::Dict)
-  #x = data_dict["n"]
-  #plotTitle = data_dict["name"]
-  #series = collect(values(data_dict["y"]))
-  #legend = collect(values(data_dict["legend"]))
-  #saveName = data_dict["save"]
-  #yLabel = data_dict["ylabel"]
+  x = data_dict["n"]
+  plotTitle = data_dict["name"]
+  series = collect(values(data_dict["y"]))
+  legend = collect(values(data_dict["legend"]))
+  saveName = data_dict["save"]
+  yLabel = data_dict["ylabel"]
 
-  x = data_dict[:n]
-  plotTitle = data_dict[:name]
-  series = collect(values(data_dict[:y]))
-  legend = collect(values(data_dict[:legend]))
-  saveName = data_dict[:save]
-  yLabel = data_dict[:ylabel]
+  # x = data_dict[:n]
+  # plotTitle = data_dict[:name]
+  # series = collect(values(data_dict[:y]))
+  # legend = collect(values(data_dict[:legend]))
+  # saveName = data_dict[:save]
+  # yLabel = data_dict[:ylabel]
 
   plotlyjs()
   isdir("./plots") || mkdir("./plots")
@@ -156,10 +166,10 @@ end
 """
 function main()
   
-  #tabu_after_x()
-  #data_dict = JSON.parsefile("./output/starting_path/length_from_x.json")
-  #draw_plot(data_dict)
-  improvement_made()
+  tabu_after_x()
+  data_dict = JSON.parsefile("./output/starting_path/length_from_x.json")
+  draw_plot(data_dict)
+  #improvement_made()
 
 end
 
