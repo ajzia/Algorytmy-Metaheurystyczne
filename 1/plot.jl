@@ -113,70 +113,66 @@ function draw_plot(name::String, data_dict::Dict)
 
   for i in ("14", "17", "22", "26", "29", "42", "51", "70", "76", "96", "100", "107", "127", "130", "137", "144", "150", "159", "175", "200")
     opt::Int64 = floor(data_dict[i][4])
+    if name == "prd"
       a = prd(data_dict[i][1], opt)
       b = prd(data_dict[i][2], opt)
       c = prd(data_dict[i][3], opt)
 
-      # push!(y4, d)
-    push!(x, i); push!(y1, a); push!(y2, b); push!(y3, c); 
-  end
+    elseif name == "k-random"
+      a = data_dict[i][1]
+      b = data_dict[i][2]
+      c = data_dict[i][3]
+      d = data_dict[i][4]
 
-  # for _ in (1:20)
-  #   push!()
-  # end
+      push!(y4, d)
+    end
+    push!(x, i); push!(y1, a); push!(y2, b); push!(y3, c)
+  end
 
   plotlyjs()
   isdir("./plots") || mkdir("./plots")
 
-  # plt = Plots.plot!(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title="$name for k_random algorithm", label = "k_random", legend=:outertopright,
-  #    margin=5Plots.mm, xlabel = "number of nodes", ylabel = "prd in %")
-  # Plots.savefig(plt, "./plots/$name-krand.png")
-  # Plots.plot()
-  l2, l3 = "rnn", "2opt"
-  # elseif name == "k-random"
-  #   plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "k = 1000", legend=:outertopright)
-  #   l2, l3 = "k = 10000", "k = 100000"
+  if name == "prd"
+    plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title="$name for k_random algorithm", label = "k_random", legend=:outertopright,
+      margin=5Plots.mm, xlabel = "number of nodes", ylabel = "prd in %")
+    Plots.savefig(plt, "./plots/$name-krand.png")
+    Plots.plot()
+    l2, l3 = "rnn", "2opt"
+  elseif name == "k-random"
+    plt = Plots.plot(x, y1, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "k = 1000", legend=:outertopright)
+    l2, l3 = "k = 10000", "k = 100000"
+  end 
 
   plt = Plots.plot!(x, y2, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = l2, legend=:outertopright,
     margin=5Plots.mm, xlabel = "number of nodes", ylabel = "prd in %")
   plt = Plots.plot!(x, y3, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = l3, legend=:outertopright,
     margin=5Plots.mm, xlabel = "number of nodes", ylabel = "prd in %")
 
-  tabu_prd = [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.2347417840375587, 3.259259259259259, 2.2304832713754648, 4.13519534858447, 
-  0.5027722958368575, 0.30471977067015776, 2.961566425998884, 3.6661211129296234, 7.402688502999155, 0.38608059859575994, 5.315940280500678,
-  1.8559885931558935, 0.52319334797029, 6.9300540136562825]
+  if name == "k-random" 
+    plt = Plots.plot!(x, y4, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "k = 1000000", legend=:outertopright, 
+    margin=5Plots.mm, xlabel = "number of nodes", ylabel = "path's weight for the best path found for specific k")
+  end
 
-  plt = Plots.plot!(x, tabu_prd, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "tabu_search", legend=:outertopright,
-  margin=5Plots.mm, xlabel = "number of nodes", ylabel = "prd in %")
-  
-  # if name == "k-random" 
-  #   plt = Plots.plot!(x, y4, xticks=:all, marker=(:circle,5), yformatter = :plain, title=name, label = "k = 1000000", legend=:outertopright, 
-  #   margin=5Plots.mm, xlabel = "number of nodes", ylabel = "path's weight for the best path found for specific k")
-  # end
-
-  Plots.savefig(plt, "./plots/$name-tabu.png")
+  Plots.savefig(plt, "./plots/$name.png")
 end
 
 """
   Main program function.
 """
 function main()
-  # save_data()
+  save_data()
 
   for (root, dirs, files) in walkdir("./data")
     for file in files
       data_dict = JSON.parsefile(joinpath(root, file))
-      # draw_plot(data_dict["name"], data_dict)
+      draw_plot(data_dict["name"], data_dict)
 
       if data_dict["name"] == "prd"
-        draw_plot(data_dict["name"], data_dict)
-        # wilcoxon_test(data_dict)
+        wilcoxon_test(data_dict)
       end
 
     end
   end
-
-end
 
 if abspath(PROGRAM_FILE) == @__FILE__
   main()
