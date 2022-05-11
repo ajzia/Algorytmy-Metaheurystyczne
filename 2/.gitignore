@@ -24,8 +24,3 @@ docs/site/
 Manifest.toml
 
 /all
-/tabutemp.jl
-/tempmain.jl
-/tempmove.jl
-/data.jl
-/x.jl

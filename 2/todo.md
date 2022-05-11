@@ -13,7 +13,6 @@
 #### Kryterium stopu:
 
 - [x] maksymalna liczba iteracji
-- [ ] maksymalny czas
 - [x] limit wywolań funkcji celu
 - [x] liczba iteracji bez nowego najlepszego rozwiązania
 
@@ -70,7 +69,7 @@
 
 - [x] przejrzeć kryterium aspiracji - sprawdzić poprawność działania
 - [x] pamięć długoterminowa
-- [ ] wielowątkowość
+- [x] wielowątkowość
 
 ```
   -> wykorzystanie wątków do przeglądania sąsiedztwa
@@ -88,7 +87,7 @@
 
 #### Tabu search:
 
-- [ ] wielowątkowość
+- [x] wielowątkowość
 
 ```
   -> wykorzystanie wątków do przeglądania sąsiedztwa -> poprawić
@@ -100,7 +99,7 @@
 
 #### Zaległe:
 
-- [ ] kryterium stopu time
+- [x] kryterium stopu time
 
 ```
   -> przypisywanie czasu do zmiennej
@@ -108,9 +107,8 @@
 
 #### Badania: (28.04-04.05)
 
-- [ ] wybranie najciekawszych statystyk
-- [ ] generowanie i zapisywanie danych
-- [ ] uniwersalne plotowanie
-- [ ] generowanie danych tsp
-  1. [ ] symetrycznych (euklidesowych)
-  2. [ ] asymetrycznych
+- [x] wybranie najciekawszych statystyk
+- [x] generowanie i zapisywanie danych
+- [x] generowanie danych tsp
+  1. [x] symetrycznych (euklidesowych)
+  2. [x] asymetrycznych

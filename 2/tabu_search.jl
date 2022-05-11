@@ -1,15 +1,18 @@
 # dzisiejsza lista tabu: wkurzanie sie na innych
 module TabuSearch
-  using TimesDates  
+  using TimesDates 
+  using Dates 
   using FLoops
 
   # exports from ../1/main.jl
   export load_tsp, struct_to_dict, calculate_path
   export k_random, nearest_neighbour, repetitive_nearest_neighbour, two_opt
-  # exports from this file
+  # export from this file
   export tabu_search
   # exports from ./stop_move.jl
   export swap, invert, insert
+  # export from ./data_generator.jl
+  export generate_dict
 
   """
       tabu_search(starting_path, move, stop, tabu_size, asp, weights) -> (Vector{Int}, Float64)
@@ -20,6 +23,7 @@ module TabuSearch
   - `move::Function`: type of movement.
   - `stop::Tuple{String, Int}`: type of stop criterion and its limit.
   - `list_size::Tuple{String, Int}`: type of tabu list length and it's parameter.
+  - `long_size::Int`: length of the long memory tabu list.
   - `asp::Float64`: value of the aspiration criterion.
   - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
     
@@ -32,9 +36,12 @@ module TabuSearch
     @assert asp > 0 && asp < 1
     
     stop_cond, max = stop; nodes = size(weights, 1)
+    mm = max
+    if stop_cond == "time" max = convert(Dates.Millisecond, Dates.Second(max)) end
 
-    stops = ["it", "time", "dest", "best"]; @assert stop_cond in stops
+    stops = ["it", "time", "best"]; @assert stop_cond in stops
     stats = Dict(); for s in stops stats[s] = 0 end
+    start =  Dates.now()
 
     sizes = ["rel", "stat"]; @assert list_size[1] in sizes
     tabu_size = list_size[1] == "rel" ? cld(nodes, list_size[2]) : list_size[2]
@@ -66,7 +73,7 @@ module TabuSearch
     # neighbours 
     ranges::Vector{Tuple{Int, Int}} = range_split(nodes)
 
-    println("Parameters: \nMove: $move \nStop criterion: \"$(stop[1])\", and max: $(stop[2]) \nType \"$(list_size[1])\", and size of tabu list: $(tabu_size) \nAspiration: $asp\n")
+    # println("Parameters: \nMove: $move \nStop criterion: \"$(stop[1])\", and max: $(stop[2]) \nType \"$(list_size[1])\", and size of tabu list: $(tabu_size) \nAspiration: $asp\n")
 
     function neighbourhood(range::Tuple{Int, Int})
       low::Int, high::Int = range
@@ -75,11 +82,10 @@ module TabuSearch
       path::Vector{Int} = copy(local_best_path) 
 
       for i in low:high
-        low2 = (move == insert) ? 1 : i+1
-        for j in low2:nodes
+        for j in i+1:nodes
           if (i == j) continue end
 
-          p::Vector{Int}, distance::Float64 = move(selected_path, (i, j), selected_path_length, weights)
+          p::Vector{Int}, distance::Float64 = move(selected_path, (i, j), selected_path_length, weights)#, asym_flag)
 
           if (tabu_matrix[i][j] && distance > global_best_length * (1 - asp))
             continue
@@ -100,16 +106,16 @@ module TabuSearch
 
       @floop for r in ranges
         (loop_path, loop_dist, loop_move) = neighbourhood(r)
-        @reduce() do (p = Vector{Int}(undef, 0); loop_path), (dist = typemax(Float64); loop_dist), (mv = (-1,-1); loop_move)
-          if (loop_dist < dist)
+        @reduce() do (p = Vector{Int}(undef, 0); loop_path), (d = typemax(Float64); loop_dist), (m = (-1,-1); loop_move)
+          if (loop_dist < d)
             p = loop_path
-            dist = loop_dist
-            mv = loop_move
+            d = loop_dist
+            m = loop_move
           end
         end
       end
       
-      (ij, local_best_path, local_best_length) = (mv, p, dist)
+      (ij, local_best_path, local_best_length) = (m, p, d)
 
       if local_best_length < global_best_length
         global_best_path, global_best_length = copy(local_best_path), local_best_length
@@ -124,7 +130,7 @@ module TabuSearch
         stats["best"] = 0
       else 
         stats["best"] += 1 
-        if stats["best"] % 1000 == 0 && memory_list != []
+        if stats["best"] % (mm / 10) == 0 && memory_list != []
           x = pop!(memory_list)
           local_best_path = x[1]
           local_best_length = x[2]
@@ -146,12 +152,14 @@ module TabuSearch
         if x != (-1, -1) tabu_matrix[x[1]][x[2]] = tabu_matrix[x[2]][x[1]] = false end
       end
 
+      stats["time"] = (Dates.now() - start)
       stats["it"] += 1
       if stats[stop_cond] > max return global_best_path, global_best_length end
     end  # while
 
   end # tabu search
 
+  include("./data_generator.jl")
   include("../1/main.jl")
   include("./move.jl")
 end # module

@@ -15,7 +15,6 @@
 """
 function swap(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, weights::AbstractMatrix{Float64})
   i::Int, j::Int = move; nodes::Int = size(weights, 1); path::Vector{Int} = copy(pathway)
-  if i > j i, j = j, i end
   path[i], path[j] = path[j], path[i] 
 
   prev_i::Int = i == 1 ? nodes : i - 1
@@ -23,7 +22,7 @@ function swap(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, we
   next_i::Int = i == nodes ? 1 : i + 1
   next_j::Int = j == nodes ? 1 : j + 1
 
-  path_length::Int = path_len::Int = distance
+  path_length::Float64 = path_len::Float64 = distance
   path_length -= weights[path[j], path[next_i]]
   path_length -= weights[path[prev_j], path[i]]
   path_length += weights[path[i], path[next_i]]
@@ -37,7 +36,7 @@ function swap(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, we
 
   if j-i == 1 return path, path_len end
 
-  return path, path_length + path_len - distance
+  return (path, path_length + path_len - distance)
 end
 
 """
@@ -61,12 +60,12 @@ function invert(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, 
 
   reverse!(path, i, j)
 
-  if (i == 1 && j == nodes) return path, distance end
+  if (i == 1 && j == nodes) return (path, distance) end
 
   prev_i::Int = i == 1 ? nodes : i - 1
   next_j::Int = j == nodes ? 1 : j + 1
 
-  path_length::Int = distance
+  path_length::Float64 = distance
   path_length -= weights[path[prev_i], path[j]]
   path_length -= weights[path[i], path[next_j]]
 
@@ -98,22 +97,22 @@ function insert(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, 
   deleteat!(path, i)
   insert!(path, j, temp)
 
-  if (i == 1 && j == nodes) return path, distance end
+  if (i == 1 && j == nodes) return (path, distance) end
 
   prev_i::Int = i == 1 ? nodes : i - 1
   prev_j::Int = j == 1 ? nodes : j - 1
   next_j::Int = j == nodes ? 1 : j + 1
 
-  path_length::Int = distance
+  path_length::Float64 = distance
   path_length -= weights[path[prev_i], path[j]]
   path_length -= weights[path[i], path[j]]
   path_length -= weights[path[prev_j], path[next_j]]
-  
+
   path_length += weights[path[prev_i], path[i]]
   path_length += weights[path[prev_j], path[j]]
   path_length += weights[path[j], path[next_j]]
 
-  return path, path_length
+  return (path, path_length)
 end
 
 function range_split(nodes)::Vector{Tuple{Int, Int}}
