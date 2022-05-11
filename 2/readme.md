@@ -56,7 +56,7 @@ Z badań wynika, że mając do czynienia z mniejszymi instancjami, użycie więk
 
 ![prd](plots/prd-tabu-rnn-twoopt.png)
 
-PRD określone jest wzorem: `(gen - opt) / opt \* 100%`, gdzie:
+PRD określone jest wzorem: `(gen - opt) / opt * 100%`, gdzie:
 
 - gen to najlepsza wartość funkcji celu dla danej heurystyki,
 - opt to rozwiązanie optymalne dla zadanego problemu
