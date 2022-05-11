@@ -1,5 +1,4 @@
-include("./tabu_search.jl")
-# include("./data_generator.jl")
+include("../tabu_search.jl")
 using .TabuSearch
 using JSON
 using Dates
