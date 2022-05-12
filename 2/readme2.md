@@ -29,7 +29,7 @@ Możliwe algorytmy generujące rozwiązanie startowe:
 
 ####
 
-![starting-paths](length-starting-path.png)
+![starting-paths](plots/length-starting-path.png)
 
 Wykres prezentuje znalezione przed tabu search rozwiązania w zależności od drogi początkowej. Możemy zauważyć, że start z rozwiązania gorszej jakości (jak k-random) skutkuje znalezieniem gorszych rozwiązań przez tabu search. Ponadto widzimy, że różnice między rozwiązaniami rosną wraz z rozmiarem problemu.
 
