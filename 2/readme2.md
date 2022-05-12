@@ -19,7 +19,7 @@ Wyniki można znaleźć:
 
 Wyniki naszych badań przedstawiamy poniżej na wykresach generowanych przez nas instancji - wiąże się to z przejrzystością wykresów. Jedynie wykres porównujący wszystkie algorytmy jest dla instancji z TSPLIB.
 
-#### Starting path a wynik tabu searcha::
+#### Starting path a wynik tabu searcha:
 
 Możliwe algorytmy generujące rozwiązanie startowe:
 
