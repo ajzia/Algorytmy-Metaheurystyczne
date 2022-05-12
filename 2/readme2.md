@@ -39,15 +39,15 @@ Wykres prezentuje znalezione przed tabu search rozwiązania w zależności od dr
 
 ![k-random](plots/kr_improv.png)
 
-![k-random%](plots/kr_improv%.png)
+![k-random%](plots/kr_improv_pr.png)
 
 ![rnn](plots/rnn_improv.png)
 
-![rnn%](plots/rnn_improv%.png)
+![rnn%](plots/rnn_improv_pr.png)
 
 ![2opt](plots/twoopt_improv.png)
 
-![2opt%](plots/twoopt_improv%.png)
+![2opt%](plots/twoopt_improv_pr.png)
 
 Dla każdego rodzaju drogi startowej przedstawiono porównanie długości drogi przed i po tabu search, a także zależność procentową między rozwiązaniem startowym a poprawionym. Można zauważyć, że bardziej zaawansowane algorytmy znajdujące rozwiązanie początkowe generują lepsze ścieżki, przez co następuje dla nich mniejsza poprawa.
 
@@ -85,7 +85,7 @@ Możliwe typy długości:
 - ustalona
 - zależna od wielkości instancji
 
-![long-term-memory](plots/long-size.png)
+![long-term-memory](plots/long_size.png)
 
 Wykres obrazuje wynik zazstosowania pamięci długoterminowej. Rozwiązania bez pamięci długoterminowej (size = 0) są zdecydowanie najgorsze. Nieznacznie lepsze od stałych wartości wydaje się uzależnienie wielkości pamięci długoterminowej od rozmiaru problemu.
 
