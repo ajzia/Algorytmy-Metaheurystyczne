@@ -17,7 +17,6 @@ module TabuSearch
   """
       tabu_search(starting_path, move, stop, tabu_size, asp, weights) -> (Vector{Int}, Float64)
     The algorithm returns the best permutation of the `path` it can find, having `starting_path` as a starting point.
-
   ## Parameters:
   - `starting_path::Vector{Int}`: the path to improve.
   - `move::Function`: type of movement.
@@ -26,13 +25,13 @@ module TabuSearch
   - `long_size::Int`: length of the long memory tabu list.
   - `asp::Float64`: value of the aspiration criterion.
   - `weights::AbstractMatrix{Float64}`: matrix of weights between nodes.
+  - `go_back::Int`: number of iterations without improvement to go back in long term.
     
   ## Returns:
   - `Vector{Int}`: the best path found.
   - `Float64`: the path's weight.   
-
   """
-  function tabu_search(starting_path::Vector{Int}, move::Function, stop::Tuple{String, Int}, list_size::Tuple{String, Int}, long_size::Int, asp::Float64, weights::AbstractMatrix{Float64})
+  function tabu_search(starting_path::Vector{Int}, move::Function, stop::Tuple{String, Int}, list_size::Tuple{String, Int}, long_size::Int, asp::Float64, weights::AbstractMatrix{Float64}, go_back::Int)
     @assert asp > 0 && asp < 1
     
     stop_cond, max = stop; nodes = size(weights, 1)
@@ -47,6 +46,10 @@ module TabuSearch
     tabu_size = list_size[1] == "rel" ? cld(nodes, list_size[2]) : list_size[2]
 
     starting_length = calculate_path(starting_path, weights)
+
+    if long_size == -1
+      long_size = cld(nodes, 2)
+    end
 
     # variables
     global_best_path::Vector{Int} = [];  global_best_length::Float64 = 0
@@ -130,7 +133,7 @@ module TabuSearch
         stats["best"] = 0
       else 
         stats["best"] += 1 
-        if stats["best"] % (mm / 10) == 0 && memory_list != []
+        if stats["best"] % go_back == 0 && memory_list != [] && long_size != 0
           x = pop!(memory_list)
           local_best_path = x[1]
           local_best_length = x[2]
