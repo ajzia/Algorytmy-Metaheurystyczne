@@ -4,7 +4,7 @@
 
 #### Grupa: czwartek 15:15
 
-#### Autorzy: Joanna Kulig (261738), Lena Jasińska (261743)
+#### Autorzy: Joanna Kulig (261738), Lena Jasińska (261740)
 
 #### Język: Julia
 
