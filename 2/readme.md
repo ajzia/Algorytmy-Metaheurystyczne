@@ -19,6 +19,38 @@ Wyniki można znaleźć:
 
 Wyniki naszych badań przedstawiamy poniżej na wykresach generowanych przez nas instancji - wiąże się to z przejrzystością wykresów. Jedynie wykres porównujący wszystkie algorytmy jest dla instancji z TSPLIB.
 
+#### Starting path a wynik tabu searcha:
+
+Możliwe algorytmy generujące rozwiązanie startowe:
+
+- `k-random`
+- `repetitive nearest neighbour`
+- `2-OPT`
+
+####
+
+![starting-paths](plots/length-starting-path.png)
+
+Wykres prezentuje znalezione przed tabu search rozwiązania w zależności od drogi początkowej. Możemy zauważyć, że start z rozwiązania gorszej jakości (jak k-random) skutkuje znalezieniem gorszych rozwiązań przez tabu search. Ponadto widzimy, że różnice między rozwiązaniami rosną wraz z rozmiarem problemu.
+
+#### Starting path a stopień poprawy rozwiązania:
+
+####
+
+![k-random](plots/kr_improv.png)
+
+![k-random%](plots/kr_improv_pr.png)
+
+![rnn](plots/rnn_improv.png)
+
+![rnn%](plots/rnn_improv_pr.png)
+
+![2opt](plots/twoopt_improv.png)
+
+![2opt%](plots/twoopt_improv_pr.png)
+
+Dla każdego rodzaju drogi startowej przedstawiono porównanie długości drogi przed i po tabu search, a także zależność procentową między rozwiązaniem startowym a poprawionym. Można zauważyć, że bardziej zaawansowane algorytmy znajdujące rozwiązanie początkowe generują lepsze ścieżki, przez co następuje dla nich mniejsza poprawa.
+
 #### Typ ruchu jako parametr:
 
 Możliwe rodzaje ruchu:
@@ -45,6 +77,23 @@ Możliwe typy długości krótkoterminowej listy tabu:
 ![short-term-memory](plots/tabu-two_opt-tsymm-minvert-sit-sm1000-ltmix-ls0-long10-a0.05.png)
 
 Z wykresu można wywnioskować, że wartość funckji celu jest znacznie lepsza dla sparametryzowanej długości krótkoterminowej listy tabu (zależnej od wielkości instancji) niż dla ustalonej długości tej listy dla każdego z problemów. Szczególnie widać różnicę przy mniejszych instancjach.
+
+#### Długość pamięci długoterminowej a wynik tabu searcha:
+
+Możliwe typy długości:
+
+- ustalona
+- zależna od wielkości instancji
+
+![long-term-memory](plots/long_size.png)
+
+Wykres obrazuje wynik zazstosowania pamięci długoterminowej. Rozwiązania bez pamięci długoterminowej (size = 0) są zdecydowanie najgorsze. Nieznacznie lepsze od stałych wartości wydaje się uzależnienie wielkości pamięci długoterminowej od rozmiaru problemu.
+
+#### Liczba iteracji bez poprawy jako kryterium stopu:
+
+![iterations-stop](plots/iterations.png)
+
+Wykres prezentuje, w jaki sposób zwiększenie dopuszczalnej liczby iteracji bez poprawy wpływa na znalezione rozwiązania. Zgodnie z intuicją, zwiększenie liczby iteracji pozwala na znalezienie lepszych rozwiązań.
 
 #### Wpływ wątków na wykonywanie programu:
 
