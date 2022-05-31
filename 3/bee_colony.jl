@@ -12,11 +12,20 @@ module artificial_bee_colony
   export swap, invert, insert
   # export from ../2/data_generator.jl
   export generate_dict
-
+  # exports from ./swarm.jl
+  export random_swarm, moving_swarm
   # export from ./bee_colony.jl
   export bee
 
+  import Base.@kwdef
   using Random
+
+  @kwdef mutable struct Bee
+    path::Vector{Int} = []
+    distance::Float64 = 0.0
+    move::Function
+    count::Int = 0
+  end
 
   # function roulette(solutions::Array{Tuple{Vector{Int}, Float64}}, nrOfBees::Int)
 
