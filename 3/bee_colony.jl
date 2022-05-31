@@ -15,7 +15,7 @@ module artificial_bee_colony
   # exports from ./swarm.jl
   export random_swarm, moving_swarm
   # export from ./bee_colony.jl
-  export bee
+  export honex
 
   import Base.@kwdef
   using Random
@@ -67,7 +67,7 @@ module artificial_bee_colony
   #   return idx
   # end
 
-  function roulette(distances::Vector{Int})
+  function roulette(distances::Vector{Float64})
     min = minimum(distances)
     while true
       random_bee = rand(1:length(distances))
@@ -77,15 +77,15 @@ module artificial_bee_colony
     end
   end
 
-  function bee(population::Int, limit::Int, nodes::Int, weights::AbstractMatrix{Float64})# i inne jakeis -> move::Function, ...
-    move = invert
+  function honex(swarm::Vector{Bee}, limit::Int, nodes::Int, weights::AbstractMatrix{Float64})
+    # move = invert
 
-    max_distance = 100
+    # max_distance = 100
     # population = 5000
     # limit = 500 # po ilu iteracjach bez ulepszeń wywalamy rozwiązanie
 
-    no_improvement::Array{Int} = zeros(Int, population)
-    solutions::Array{Tuple{Vector{Int}, Float64}} = [] 
+    # no_improvement::Array{Int} = zeros(Int, population)
+    # solutions::Array{Tuple{Vector{Int}, Float64}} = [] 
     
     
     #tsp_dict = generate_dict(nodes, max_distance, true)
@@ -97,21 +97,21 @@ module artificial_bee_colony
     # (best_path, best_distance) = k_random(tsp_dict, 1)
     best_path::Vector{Int} = shuffle(collect(1:nodes))
     best_distance::Float64 = calculate_path(best_path, weights)
-    push!(solutions, (best_path, best_distance))
+    # push!(solutions, (best_path, best_distance))
     # push!(no_improvement, 0)
 
     println("Start best: $best_distance")
 
 
-    for _ in 2:population # inicjalizacja rozwiązań
-      path = shuffle(collect(1:nodes))
-      dist = calculate_path(path, weights)
-      push!(solutions, (path, dist))
+    for bee in swarm # inicjalizacja rozwiązań
+      bee.path = shuffle(collect(1:nodes))
+      bee.distance = calculate_path(bee.path, weights)
+      # push!(solutions, (path, dist))
       # push!(no_improvement, 0)
 
-      if dist < best_distance
-        best_path = copy(path)
-        best_distance = dist
+      if bee.distance < best_distance
+        best_path = copy(bee.path)
+        best_distance = bee.distance
       end
     end
 
@@ -121,67 +121,69 @@ module artificial_bee_colony
       #if it%1000 == 0 println("10%") end
       println("Iteration: $it")
       
-      # petla nr 1 (pierwsze pszczolki)
-      for k in 1:population
+      # 1st loop -> worker bees
+      for employbee in swarm
+        # for k in 1:population
         (i, j) = rand(1:nodes, 2)
-        (curr_solution, curr_distance) = solutions[k]
-        (new_solution, new_distance) = move(curr_solution, (i, j), curr_distance, weights)
+        (curr_path, curr_distance) = employbee.path, employbee.distance
+        (new_path, new_distance) = employbee.move(curr_path, (i, j), curr_distance, weights)
 
         if new_distance < curr_distance
-          no_improvement[k] = 0
-          solutions[k] = copy(new_solution), new_distance
+          employbee.count = 0
+          # no_improvement[k] = 0
+          (employbee.path, employbee.distance) = copy(new_path), new_distance
           if new_distance < best_distance
+            best_path = copy(new_path)
+            best_distance = new_distance  
             println("NEW BEST!: $(best_distance)")
-            best_path = copy(new_solution)
-            best_distance = new_distance  
-          best_distance = new_distance
-            best_distance = new_distance  
-          best_distance = new_distance
-            best_distance = new_distance  
-          best_distance = new_distance
-            best_distance = new_distance  
           end
         else
-          no_improvement[k] += 1
+          employbee.count += 1
         end
 
       end
       
-      # pętla nr 2 (obserwatorzy)
-      for k in 1:population
-        random_flower = roulette(solutions[1][1])
+      # 2nd loop -> bee observers
+      path_weights = [bee.distance for bee in swarm]
+      for observer in swarm
+        # for k in 1:population
+        random_flower = roulette(path_weights)
+        lucky_bee = swarm[random_flower]
         # p = rand()
         # random_flower = roulette_shoot(prob, p) # tu bedzie ruletka ale jeszcze nie ma :)
 
         (i, j) = rand(1:nodes, 2)
-        curr_solution, curr_distance = solutions[random_flower]
-        new_solution, new_distance = move(curr_solution, (i, j), curr_distance, weights)
+        (curr_path, curr_distance) = (lucky_bee.path, lucky_bee.distance)
+        (new_path, new_distance) = observer.move(curr_path, (i, j), curr_distance, weights)
 
         if new_distance < curr_distance
-          no_improvement[k] = 0
-          solutions[k] = copy(new_solution), new_distance
+          observer.count = 0
+          # no_improvement[k] = 0
+          (observer.path, observer.distance) = copy(new_path), new_distance
           if new_distance < best_distance
-            println("NEW BEST!: $(best_distance)")
-            best_path = copy(new_solution)
+            best_path = copy(new_path)
             best_distance = new_distance
+            println("NEW BEST!: $(best_distance)")
           end
         else
-          no_improvement[k] += 1
+          observer.count += 1
         end
       end
 
-      # pętla nr 3 (zwiadowcy)
-      for k in 1:population
-        if no_improvement[k] > limit
-          new_solution = shuffle(collect(1:nodes))
-          new_distance = calculate_path(new_solution, weights)
+      # 3rd loop -> bee scouts
+      for scout in swarm
+        # for k in 1:population
+        if scout.count > limit
+          new_path = shuffle(collect(1:nodes))
+          new_distance = calculate_path(new_path, weights)
 
-          solutions[k] = copy(new_solution), new_distance
-          no_improvement[k] = 0
+          (scout.path, scout.distance) = copy(new_path), new_distance
+          scout.count = 0
+          # no_improvement[k] = 0
           if new_distance < best_distance
-            println("NEW BEST!: $(best_distance)")
-            best_path = copy(new_solution)
+            best_path = copy(new_path)
             best_distance = new_distance
+            println("NEW BEST!: $(best_distance)")
           end
         end
       end
