@@ -15,12 +15,19 @@ function main(args)
   tsp_dict = load_tsp("./all/$(args[1]).tsp")
   max = parse(Int, args[3])
   
-  size = 1000; limit = 500
+  size = 1000; limit = 3000
   stop_cond = args[2]
-  path, distance = @time honex(random_swarm(size), limit, (STOP_CONDITIONS[stop_cond], max), tsp_dict[:dimension], tsp_dict[:weights])
+  #path, distance = @time honex(random_swarm(size), limit, (STOP_CONDITIONS[stop_cond], max), tsp_dict[:dimension], tsp_dict[:weights])
+  path, distance = @time honex(moving_swarm(size, invert), limit, (STOP_CONDITIONS[stop_cond], max), tsp_dict[:dimension], tsp_dict[:weights], (roulette, 0.0))
+
+  path2, distance2 = @time honex(moving_swarm(size, invert), limit, (STOP_CONDITIONS[stop_cond], max), tsp_dict[:dimension], tsp_dict[:weights], (tournament, 0.08))
+
 
   println("\n >==================================== AFTER ABC ====================================<\n")
+  println("Roulette:")
   println("Path: $path\nDistance: $distance")
+  println("Tournament:")
+  println("Path: $path2\nDistance: $distance2")
   println("Optimal: $(tsp_dict[:optimal])")
 end
 

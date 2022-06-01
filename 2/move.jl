@@ -112,7 +112,7 @@ function insert(pathway::Vector{Int}, move::Tuple{Int, Int}, distance::Float64, 
   path_length += weights[path[prev_j], path[j]]
   path_length += weights[path[j], path[next_j]]
 
-  return (path, path_length)
+  return (path, calculate_path(path, weights))
 end
 
 function range_split(nodes)::Vector{Tuple{Int, Int}}

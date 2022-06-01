@@ -50,3 +50,38 @@ function moving_swarm(size::Int, move::Function)::Vector{Bee}
   end
   return swarm
 end
+
+
+"""
+    organized_swarm(size::Int, ratio::Tuple{Float64, Float64, Float64}) -> Vector{Bee}
+  Creates a population of bees of `size` with given `ratio` of moves.
+
+## Parameters:
+- `size::Int`: size of the population.
+- `ratio::Tuple{Float64, Float64, Float64}`: ratio of different moves, in order: invert, insert, swap
+
+## Returns:
+- `Vector{Bee}`: population of bees with `move`.
+
+"""
+function organized_swarm(size::Int, ratio::Tuple{Float64, Float64, Float64})::Vector{Bee}
+  swarm::Vector{Bee} = []
+
+  @assert ((ratio[1] + ratio[2] + ratio[3]) == 1)
+
+  slots_left::Int = size
+
+  invert_bees::Int = floor(ratio[1] * size)
+  slots_left -= invert_bees
+  insert_bees::Int = floor(min(ratio[2] * size, slots_left))
+  slots_left -= insert_bees
+  #swap_bees = min(ratio[3] * size, slots_left)
+  swap_bees::Int = slots_left
+  
+  append!(swarm, moving_swarm(invert_bees, invert))
+  append!(swarm, moving_swarm(insert_bees, insert))
+  append!(swarm, moving_swarm(swap_bees, swap))
+
+  return swarm
+end
+
