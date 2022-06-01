@@ -3,6 +3,7 @@ module artificial_bee_colony
   include("../2/data_generator.jl")
   include("../1/main.jl")
   include("../2/move.jl")
+  include("./stop_conditions.jl")
   include("./swarm.jl")
 
   # exports from ../1/main.jl
@@ -14,18 +15,12 @@ module artificial_bee_colony
   export generate_dict
   # exports from ./swarm.jl
   export random_swarm, moving_swarm
+  # exports from ./stop_conditions.jl
+  export iteration_condition, time_condition
   # export from ./bee_colony.jl
   export honex
 
-  import Base.@kwdef
   using Random
-
-  @kwdef mutable struct Bee
-    path::Vector{Int} = []
-    distance::Float64 = 0.0
-    move::Function
-    count::Int = 0
-  end
 
   # function roulette(solutions::Array{Tuple{Vector{Int}, Float64}}, nrOfBees::Int)
 
@@ -77,7 +72,7 @@ module artificial_bee_colony
     end
   end
 
-  function honex(swarm::Vector{Bee}, limit::Int, nodes::Int, weights::AbstractMatrix{Float64})
+  function honex(swarm::Vector{Bee}, limit::Int, stop::Tuple{Function, Int}, nodes::Int, weights::AbstractMatrix{Float64})
     # move = invert
 
     # max_distance = 100
@@ -100,10 +95,12 @@ module artificial_bee_colony
     # push!(solutions, (best_path, best_distance))
     # push!(no_improvement, 0)
 
-    println("Start best: $best_distance")
+    # stop condition
+    (stop_function, max) = stop
+    (start, max, increment, check) = stop_function(max)
 
-
-    for bee in swarm # inicjalizacja rozwiązań
+    # initial path and it's weights
+    for bee in swarm 
       bee.path = shuffle(collect(1:nodes))
       bee.distance = calculate_path(bee.path, weights)
       # push!(solutions, (path, dist))
@@ -115,11 +112,9 @@ module artificial_bee_colony
       end
     end
 
-    it = 1
-
-    while it <= 5000 # tu bedzie jakis stop fajniejszy
+    while check(start, max)
       #if it%1000 == 0 println("10%") end
-      println("Iteration: $it")
+      if typeof(max) == Int println("Iteration: $start") end
       
       # 1st loop -> worker bees
       for employbee in swarm
@@ -188,7 +183,7 @@ module artificial_bee_colony
         end
       end
 
-      it+=1
+      start = increment(start)
     end # while
 
     return (best_path, best_distance)

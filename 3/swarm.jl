@@ -1,4 +1,13 @@
+import Base.@kwdef
+
 const MOVES = [insert, invert, swap]
+
+@kwdef mutable struct Bee
+  path::Vector{Int} = []
+  distance::Float64 = 0.0
+  move::Function
+  count::Int = 0
+end
 
 """
     random_swarm(size::Int) -> Vector{Bee}
@@ -8,7 +17,7 @@ const MOVES = [insert, invert, swap]
 - `size::Int`: size of the population.
 
 ## Returns:
-- `Vector{Bee}`: population of bees with `move`.
+- `Vector{Bee}`: population of bees random moves.
 
 """
 function random_swarm(size::Int)::Vector{Bee}

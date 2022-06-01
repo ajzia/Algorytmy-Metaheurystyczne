@@ -20,8 +20,8 @@ end
 ```
 
 - [x] tworzenie populacji
-  - [x] z losowymi funkcjami celu
-  - [x] z wybraną funkcją celu
+  - [x] z losowymi funkcjami ruchu
+  - [x] z wybraną funkcją ruchu
 
 #### Elementy algorytmu:
 
@@ -38,6 +38,7 @@ end
 
 #### ABC:
 
+- [x] dodanie kryteriów stopu (czas, liczba iteracji)
 - [ ] wątki
 - [ ] komentarz do funkcji `honex` 
 
@@ -48,7 +49,10 @@ end
 
 #### Utils:
 
-- [ ] komentarz - ruletka
+- [ ] komentarze
+  - [ ] ruletka
+  - [x] swarm.jl
+  - [x] stop_conditions.jl
 
 #### Badania:
 
