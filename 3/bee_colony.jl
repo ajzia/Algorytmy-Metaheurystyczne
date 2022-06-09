@@ -23,7 +23,7 @@ module artificial_bee_colony
   # exports from ./selection_types.jl
   export roulette, tournament
 
-  using Random, FLoops
+  using Random, FLoops, TimesDates
   
   function best_bee(bees::Vector{Bee})::Bee
     return reduce((x, y) -> x.distance < y.distance ? x : y, bees)
@@ -140,7 +140,7 @@ module artificial_bee_colony
     end
 
     while check(start, max)
-      if typeof(max) == Int println("Iteration: $start") end
+      # if typeof(max) == Int println("Iteration: $start") end
 
       # 1st loop -> bee employees
       @floop for (i, j) in ranges
@@ -156,7 +156,7 @@ module artificial_bee_colony
       if d_e < best_distance
         best_path = copy(p_e)
         best_distance = d_e
-        println("(e) NEW BEST!: $(best_distance)")
+        # println("(e) NEW BEST!: $(best_distance)")
       end
       
       # 2nd loop -> bee observers
@@ -175,7 +175,7 @@ module artificial_bee_colony
       if (d_o < best_distance)
         best_path = copy(p_o)
         best_distance = d_o
-        println("(o) NEW BEST!: $(best_distance)")
+        # println("(o) NEW BEST!: $(best_distance)")
       end
 
       # 3rd loop -> bee scouts
@@ -192,7 +192,7 @@ module artificial_bee_colony
       if d_s < best_distance
         best_path = copy(p_s)
         best_distance = d_s
-        println("(s) NEW BEST!: $(best_distance)")
+        # println("(s) NEW BEST!: $(best_distance)")
       end
 
       start = increment(start)
