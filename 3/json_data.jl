@@ -43,6 +43,7 @@ function generate_data(
   )
 
   results = Dict()
+  results["time"] = Dict()
 
   if type == "tsp"
     collection = tsp_files
@@ -66,20 +67,45 @@ function generate_data(
 
     nodes = tsp_dict[:dimension]
     results[nodes] = []
-    temp = []
+    if stat == "threads" results["time"][nodes] = [] end
+    temp = []; time_temp = []
     
-    for i in 1:1
+    low = 1
+    if stat == "threads" low = 5 end
+    for i in 1:low
+      test_start = time_ns()
       # println("Try: $(i)")
       _, distance = honex(swarm, limit, (stop_type, stop_max), nodes, tsp_dict[:weights], (select_func, select_param))
       push!(temp, distance)
+      test_end = time_ns()
+      time = (test_end - test_start) * 1e-6
+      push!(time_temp, time) 
+    end
+    
+    if stat == "threads" 
+      # push!(results[nodes][])
+      push!(results["time"][i], mean(time)) 
     end
 
-    if stat == "prd"
-      opt::Int = (n == "ulysses22") ? 7013 : tsp_dict[:optimal]
-      best_prd = prd(mean(temp), opt)
-      println("Mean: $(mean(temp)), Opt: $(opt), Prd: $(best_prd)")
-      push!(results[nodes], best_prd)
+    if stat == "oprd"
+      push!(results[nodes], temp[1])
     end
+
+    if stat == "prd" && type == "tsp"
+      if type == "tsp"
+        opt::Int = (n == "ulysses22") ? 7013 : tsp_dict[:optimal]
+        best_prd = prd(mean(temp), opt)
+        println("Mean: $(mean(temp)), Opt: $(opt), Prd: $(best_prd)")
+        push!(results[nodes], best_prd)
+      else
+        opt = minimum(temp)
+        best_prd = prd(mean(temp), opt)
+        println("Mean: $(mean(temp)), Opt: $(opt), Prd: $(best_prd)")
+        push!(results[nodes], best_prd)
+      end
+    end
+
+
 
     # test_start = time_ns()
     # test_end = time_ns()
