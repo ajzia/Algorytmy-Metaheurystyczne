@@ -63,12 +63,12 @@ end
 #### Badania:
 
 - [x] najlepsza lambda dla turnieju (soon bo ważne)
-- [ ] prd
-- [ ] porównanie czas/iteracje `tabu` a `abc`
+- [x] prd
+- [x] porównanie czas/iteracje `tabu` a `abc`
 - [x] wielkość populacji
 - [x] iteracje bez poprawy rozwiązania
 - [x] swarm (random a insert a invert a swap)
 - [x] organized swarm - różne ratio
 - [x] lambda dla turnieju
 - [x] ruletka a turniej
-- [ ] czas działania na określonej liczbie wątków
+- [x] czas działania na określonej liczbie wątków
