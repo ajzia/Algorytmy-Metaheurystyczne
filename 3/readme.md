@@ -87,7 +87,7 @@ Wykres i wnioski
 
 #### Porównanie skuteczności ABC do algorytmów zaimplementowanych w [etapie 1](http://radoslaw.idzikowski.staff.iiar.pwr.wroc.pl/instruction/meta1.pdf) i [etapie 2](http://radoslaw.idzikowski.staff.iiar.pwr.wroc.pl/instruction/meta2.pdf) na podstawie prd:
 
-![prd]()
+Tu będzie wykres
 
 PRD określone jest wzorem: `(gen - opt) / opt * 100%`, gdzie:
 
